@@ -5388,6 +5388,19 @@ function getCurrentAnswers() {
   return quizState.answeredBySection[quizState.currentSection];
 }
 
+function pixelizeDiagramMarkup(markup) {
+  if (!markup) return "";
+
+  return String(markup)
+    .replace(/\s(?:rx|ry)="[^"]*"/g, "")
+    .replace(/font-size="9"/g, 'font-size="10"')
+    .replace(/font-size="10"/g, 'font-size="11"')
+    .replace(/font-size="11"/g, 'font-size="12"')
+    .replace(/stroke-width="1(?:\.0)?"/g, 'stroke-width="2"')
+    .replace(/stroke-width="1\.5"/g, 'stroke-width="2"')
+    .replace(/<svg\b([^>]*)class="([^"]*\bquiz-diagram\b[^"]*)"([^>]*)>/, '<svg$1class="$2"$3 data-pixel-diagram="true">');
+}
+
 function initQuiz() {
   const content = document.getElementById("notsodumbContent");
   content.innerHTML = `
@@ -5438,7 +5451,10 @@ function renderQuestion() {
   const checked = Boolean(savedState?.checked);
 
   sectionHeaderEl.innerHTML = `
-    <p class="notsodumb-eyebrow" aria-hidden="true">&nbsp;</p>
+    <div class="quiz-section-banner">
+      <p class="notsodumb-eyebrow">🧠 notsodumb</p>
+      <span class="quiz-section-counter">${qNum}/${totalQ}</span>
+    </div>
     <h2 class="quiz-section-title">${section.title}</h2>
     <p class="quiz-section-desc">${section.description}</p>
     <div class="quiz-section-switcher" id="quizSectionSwitcher" aria-label="${notsodumbTranslate("quiz.sectionPicker")}"></div>
@@ -5452,7 +5468,7 @@ function renderQuestion() {
   ).join("");
   const difficultyLabel = notsodumbTranslate("quiz.difficulty", { value: q.difficulty });
 
-  const diagramHtml = q.diagram ? `<div class="quiz-diagram-wrap">${q.diagram}</div>` : "";
+  const diagramHtml = q.diagram ? `<div class="quiz-diagram-wrap">${pixelizeDiagramMarkup(q.diagram)}</div>` : "";
   const choicesHtml = Array.isArray(q.choices)
     ? `
       <div class="quiz-choice-list" role="list" aria-label="${notsodumbTranslate("quiz.answerChoices")}">
@@ -5688,7 +5704,7 @@ function renderFeedback(q, savedState) {
 
 function renderAnswer(q, savedState) {
   const answerDiagramHtml = q.answerDiagram
-    ? `<div class="quiz-diagram-wrap">${q.answerDiagram}</div>`
+    ? `<div class="quiz-diagram-wrap">${pixelizeDiagramMarkup(q.answerDiagram)}</div>`
     : "";
 
   const answerEl = document.getElementById("quizAnswer");
@@ -5757,8 +5773,8 @@ function showCompletion() {
           <div id="notsodumbLangMount" class="notsodumb-lang-mount"></div>
         </div>
         <div class="quiz-complete-icon">🧠</div>
-        <p class="notsodumb-eyebrow" aria-hidden="true">&nbsp;</p>
-        <h2>${hasNextSection ? notsodumbTranslate("quiz.completionTitle", { section: section.title }) : notsodumbTranslate("quiz.completionAllTitle")}</h2>
+        <p class="notsodumb-eyebrow">🧠 notsodumb</p>
+        <h2 class="quiz-complete-title">${hasNextSection ? notsodumbTranslate("quiz.completionTitle", { section: section.title }) : notsodumbTranslate("quiz.completionAllTitle")}</h2>
         <p class="quiz-complete-text">${hasNextSection ? notsodumbTranslate("quiz.completionCopy", { section: section.title, count: section.questions.length }) : notsodumbTranslate("quiz.completionAllCopy", { count: QUIZ_SECTIONS.reduce((sum, current) => sum + current.questions.length, 0) })}<br>
         ${hasNextSection ? notsodumbTranslate("quiz.completionNext") : notsodumbTranslate("quiz.completionDone")}</p>
         <div class="quiz-complete-nav">
