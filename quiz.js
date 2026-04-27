@@ -5388,17 +5388,67 @@ function getCurrentAnswers() {
   return quizState.answeredBySection[quizState.currentSection];
 }
 
+const TWEMOJI_BASE = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/";
+const TWEMOJI_OPTIONS = {
+  base: "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/",
+  folder: "svg",
+  ext: ".svg",
+  className: "twemoji"
+};
+
+function getTwemojiApi() {
+  return typeof window !== "undefined" ? window.twemoji : null;
+}
+
+function applyTwemoji(root = document.body) {
+  const twemoji = getTwemojiApi();
+  if (!twemoji || !root) return;
+  twemoji.parse(root, TWEMOJI_OPTIONS);
+}
+
+function getTwemojiSvgUrl(value) {
+  const twemoji = getTwemojiApi();
+  const emoji = String(value || "").trim();
+  if (!twemoji?.convert?.toCodePoint || !twemoji?.parse || !emoji) return "";
+
+  const parsed = twemoji.parse(emoji, TWEMOJI_OPTIONS);
+  if (parsed === emoji || !parsed.includes("<img")) return "";
+
+  return `${TWEMOJI_BASE}${twemoji.convert.toCodePoint(emoji)}.svg`;
+}
+
+function replaceSvgEmojiWithTwemoji(markup) {
+  if (!markup) return "";
+
+  return String(markup).replace(/<text\b([^>]*)>(.*?)<\/text>/g, (full, attrs, content) => {
+    const emojiUrl = getTwemojiSvgUrl(content);
+    if (!emojiUrl) return full;
+
+    const x = Number(attrs.match(/\bx="([^"]+)"/)?.[1] || 0);
+    const y = Number(attrs.match(/\by="([^"]+)"/)?.[1] || 0);
+    const fontSize = Number(attrs.match(/\bfont-size="([^"]+)"/)?.[1] || 16);
+    const textAnchor = attrs.match(/\btext-anchor="([^"]+)"/)?.[1] || "start";
+    const size = Math.max(16, Math.round(fontSize * 1.3));
+    const left = textAnchor === "middle" ? x - size / 2 : textAnchor === "end" ? x - size : x;
+    const top = y - size * 0.88;
+
+    return `<image class="twemoji-svg" href="${emojiUrl}" x="${left}" y="${top}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet" />`;
+  });
+}
+
 function pixelizeDiagramMarkup(markup) {
   if (!markup) return "";
 
-  return String(markup)
+  return replaceSvgEmojiWithTwemoji(
+    String(markup)
     .replace(/\s(?:rx|ry)="[^"]*"/g, "")
     .replace(/font-size="9"/g, 'font-size="10"')
     .replace(/font-size="10"/g, 'font-size="11"')
     .replace(/font-size="11"/g, 'font-size="12"')
     .replace(/stroke-width="1(?:\.0)?"/g, 'stroke-width="2"')
     .replace(/stroke-width="1\.5"/g, 'stroke-width="2"')
-    .replace(/<svg\b([^>]*)class="([^"]*\bquiz-diagram\b[^"]*)"([^>]*)>/, '<svg$1class="$2"$3 data-pixel-diagram="true">');
+    .replace(/<svg\b([^>]*)class="([^"]*\bquiz-diagram\b[^"]*)"([^>]*)>/, '<svg$1class="$2"$3 data-pixel-diagram="true">')
+  );
 }
 
 function initQuiz() {
@@ -5449,11 +5499,12 @@ function renderQuestion() {
   const savedState = getQuestionState();
   const selectedChoice = savedState?.selectedChoice;
   const checked = Boolean(savedState?.checked);
+  const counterText = `${String(qNum).padStart(2, "0")} / ${String(totalQ).padStart(2, "0")}`;
 
   sectionHeaderEl.innerHTML = `
     <div class="quiz-section-banner">
       <p class="notsodumb-eyebrow">🧠 notsodumb</p>
-      <span class="quiz-section-counter">${qNum}/${totalQ}</span>
+      <span class="quiz-section-counter">${counterText}</span>
     </div>
     <h2 class="quiz-section-title">${section.title}</h2>
     <p class="quiz-section-desc">${section.description}</p>
@@ -5545,6 +5596,7 @@ function renderQuestion() {
 
   renderFeedback(q, savedState);
   renderAnswer(q, savedState);
+  applyTwemoji(document.getElementById("notsodumbContent"));
 }
 
 function renderSectionSwitcher() {
@@ -5810,6 +5862,7 @@ function showCompletion() {
       jumpToQuestion(Number(button.dataset.completeJump));
     });
   });
+  applyTwemoji(content);
 }
 
 onNotsodumbLanguageChange(() => {
