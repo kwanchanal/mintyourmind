@@ -6087,10 +6087,7 @@ function renderQuestion() {
   const counterText = `${String(qNum).padStart(2, "0")} / ${String(totalQ).padStart(2, "0")}`;
 
   sectionHeaderEl.innerHTML = `
-    <div class="quiz-section-banner">
-      <span class="quiz-section-counter">${counterText}</span>
-    </div>
-    <h2 class="quiz-section-title">${section.title}</h2>
+    <h2 class="quiz-section-title">${section.title.split(": ").slice(1).join(": ") || section.title}</h2>
     <p class="quiz-section-desc">${section.description}</p>
     <div class="quiz-section-switcher" id="quizSectionSwitcher" aria-label="${openmindTranslate("quiz.sectionPicker")}"></div>
   `;
@@ -6208,7 +6205,6 @@ function renderSectionSwitcher() {
         aria-current="${isCurrent ? "true" : "false"}"
       >
         <span class="quiz-section-chip-label">${chipLabel}</span>
-        <span class="quiz-section-chip-meta">${completedCount}/${section.questions.length}</span>
       </button>
     `;
   }).join("");

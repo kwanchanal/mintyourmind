@@ -4045,3 +4045,70 @@ html[data-openmind-lang="en"] button,
 html[data-openmind-lang="en"] input {
   font-family: var(--brain-body);
 }
+
+/* Tab bar section switcher */
+.quiz-section-switcher {
+  flex-wrap: nowrap;
+  gap: 0;
+  overflow-x: auto;
+  margin-top: 0;
+  border-bottom: 2px solid var(--brain-line-strong);
+  scrollbar-width: none;
+}
+
+.quiz-section-switcher::-webkit-scrollbar {
+  display: none;
+}
+
+.quiz-section-chip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--brain-muted);
+  white-space: nowrap;
+  box-shadow: none;
+  transform: none;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.quiz-section-chip:hover {
+  transform: none;
+  border-color: transparent;
+  background: transparent;
+  color: var(--brain-ink);
+  box-shadow: none;
+}
+
+.quiz-section-chip-label {
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--brain-display);
+  letter-spacing: 0.01em;
+}
+
+.quiz-section-chip-meta {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.quiz-section-chip.is-started {
+  border-color: transparent;
+  background: transparent;
+  color: var(--brain-ink);
+}
+
+.quiz-section-chip.is-current {
+  border-bottom-color: var(--brain-accent-strong);
+  background: transparent;
+  color: var(--brain-accent-strong);
+}
