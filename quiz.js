@@ -88,11 +88,18 @@ function applyOpenmindLanguage(lang) {
   document.documentElement.setAttribute("data-openmind-lang", lang);
 }
 
+function stripEmoji(value) {
+  return String(value ?? "")
+    .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F]/gu, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
 function openmindTranslate(path, vars = {}) {
   const lang = getOpenmindLanguage();
   const source = OPENMIND_DICTIONARY[lang] || OPENMIND_DICTIONARY.th;
   const template = path.split(".").reduce((current, key) => current?.[key], source) || path;
-  return String(template).replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? "");
+  return stripEmoji(String(template).replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? ""));
 }
 
 function setOpenmindLanguage(lang) {
@@ -115,10 +122,10 @@ function localizeValue(value) {
     ("th" in value || "en" in value)
   ) {
     const lang = getOpenmindLanguage();
-    return value[lang] ?? value.th ?? value.en ?? "";
+    return stripEmoji(value[lang] ?? value.th ?? value.en ?? "");
   }
 
-  return value;
+  return typeof value === "string" ? stripEmoji(value) : value;
 }
 
 applyOpenmindLanguage(getOpenmindLanguage());
@@ -5348,13 +5355,13 @@ function getLocalizedQuestion(question) {
     question.choices;
   return {
     ...question,
-    title: translatedQuestion.title || localizeValue(question.title),
-    question: translatedQuestion.question || localizeValue(question.question),
-    answer: translatedQuestion.answer || localizeValue(question.answer),
-    explanation: explanationOverride || translatedQuestion.explanation || localizeValue(question.explanation),
+    title: stripEmoji(translatedQuestion.title || localizeValue(question.title)),
+    question: stripEmoji(translatedQuestion.question || localizeValue(question.question)),
+    answer: stripEmoji(translatedQuestion.answer || localizeValue(question.answer)),
+    explanation: stripEmoji(explanationOverride || translatedQuestion.explanation || localizeValue(question.explanation)),
     diagram: localizeValue(question.diagram),
     answerDiagram: localizeValue(question.answerDiagram),
-    choices: localizedChoices
+    choices: Array.isArray(localizedChoices) ? localizedChoices.map(stripEmoji) : localizedChoices
   };
 }
 
@@ -5388,67 +5395,583 @@ function getCurrentAnswers() {
   return quizState.answeredBySection[quizState.currentSection];
 }
 
-const TWEMOJI_BASE = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/";
-const TWEMOJI_OPTIONS = {
-  base: "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/",
-  folder: "svg",
-  ext: ".svg",
-  className: "twemoji"
-};
-
-function getTwemojiApi() {
-  return typeof window !== "undefined" ? window.twemoji : null;
-}
-
-function applyTwemoji(root = document.body) {
-  const twemoji = getTwemojiApi();
-  if (!twemoji || !root) return;
-  twemoji.parse(root, TWEMOJI_OPTIONS);
-}
-
-function getTwemojiSvgUrl(value) {
-  const twemoji = getTwemojiApi();
-  const emoji = String(value || "").trim();
-  if (!twemoji?.convert?.toCodePoint || !twemoji?.parse || !emoji) return "";
-
-  const parsed = twemoji.parse(emoji, TWEMOJI_OPTIONS);
-  if (parsed === emoji || !parsed.includes("<img")) return "";
-
-  return `${TWEMOJI_BASE}${twemoji.convert.toCodePoint(emoji)}.svg`;
-}
-
-function replaceSvgEmojiWithTwemoji(markup) {
-  if (!markup) return "";
-
-  return String(markup).replace(/<text\b([^>]*)>(.*?)<\/text>/g, (full, attrs, content) => {
-    const emojiUrl = getTwemojiSvgUrl(content);
-    if (!emojiUrl) return full;
-
-    const x = Number(attrs.match(/\bx="([^"]+)"/)?.[1] || 0);
-    const y = Number(attrs.match(/\by="([^"]+)"/)?.[1] || 0);
-    const fontSize = Number(attrs.match(/\bfont-size="([^"]+)"/)?.[1] || 16);
-    const textAnchor = attrs.match(/\btext-anchor="([^"]+)"/)?.[1] || "start";
-    const size = Math.max(16, Math.round(fontSize * 1.3));
-    const left = textAnchor === "middle" ? x - size / 2 : textAnchor === "end" ? x - size : x;
-    const top = y - size * 0.88;
-
-    return `<image class="twemoji-svg" href="${emojiUrl}" x="${left}" y="${top}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet" />`;
-  });
-}
-
 function pixelizeDiagramMarkup(markup) {
   if (!markup) return "";
 
-  return replaceSvgEmojiWithTwemoji(
-    String(markup)
+  return stripEmoji(String(markup))
     .replace(/\s(?:rx|ry)="[^"]*"/g, "")
     .replace(/font-size="9"/g, 'font-size="10"')
     .replace(/font-size="10"/g, 'font-size="11"')
     .replace(/font-size="11"/g, 'font-size="12"')
     .replace(/stroke-width="1(?:\.0)?"/g, 'stroke-width="2"')
     .replace(/stroke-width="1\.5"/g, 'stroke-width="2"')
-    .replace(/<svg\b([^>]*)class="([^"]*\bquiz-diagram\b[^"]*)"([^>]*)>/, '<svg$1class="$2"$3 data-pixel-diagram="true">')
-  );
+    .replace(/<svg\b([^>]*)class="([^"]*\bquiz-diagram\b[^"]*)"([^>]*)>/, '<svg$1class="$2"$3 data-pixel-diagram="true">');
+}
+
+function escapeAttribute(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+const QUESTION_PIXEL_SCENES = {
+  1: "villagers",
+  2: "seasoning",
+  3: "testimony",
+  4: "rps",
+  5: "calendar",
+  6: "companies",
+  7: "pingpong",
+  8: "heaven-road",
+  9: "two-hats",
+  10: "three-hats",
+  11: "cat-boxes",
+  12: "stairway",
+  13: "hotel-money",
+  14: "married-question",
+  15: "runner",
+  16: "plane-wind",
+  17: "passing-ships",
+  18: "products",
+  19: "population",
+  20: "salary-plan",
+  21: "white-ball",
+  22: "three-cards",
+  23: "racehorses",
+  24: "four-cards",
+  25: "election",
+  26: "truth-island",
+  27: "bear-color",
+  28: "two-ropes",
+  29: "four-boats",
+  30: "slow-horse",
+  31: "desert-crossing",
+  32: "scale-coins",
+  33: "banknotes",
+  34: "black-white-stones",
+  35: "cows",
+  36: "ten-coins",
+  37: "fake-coin-piles",
+  38: "postal-lock",
+  39: "vote-count",
+  40: "fruit-boxes",
+  41: "ages",
+  42: "book-errors",
+  43: "restaurant-menu",
+  44: "two-cards",
+  45: "business-cards",
+  46: "red-blue-stickers",
+  47: "apples",
+  48: "code-room",
+  49: "suspects",
+  50: "round-robin",
+  51: "sports-rank",
+  52: "muddy-people",
+  53: "messy-hair",
+  54: "stair-hats",
+  55: "truel",
+  56: "bar-seats",
+  57: "pirate-coins",
+  58: "king-salary",
+  59: "stamps",
+  60: "birthday",
+  61: "dragons",
+  62: "impossible-number",
+  63: "cookie-game",
+  64: "notebook-sticker",
+  65: "bakers",
+  66: "bottles"
+};
+
+function getQuestionSceneType(question) {
+  const mappedScene = QUESTION_PIXEL_SCENES[Number(question.id)];
+  if (mappedScene) return mappedScene;
+
+  const source = `${question.title || ""} ${question.question || ""}`.toLowerCase();
+  if (/angel|demon|human|liar|truth|เทวดา|ปีศาจ|มนุษย์|โกหก|จริง/.test(source)) return "people";
+  if (/path|stair|heaven|left|right|ทาง|ซ้าย|ขวา|สวรรค์/.test(source)) return "path";
+  if (/yen|coin|money|hotel|pirate|เยน|เหรียญ|เงิน|โรงแรม/.test(source)) return "money";
+  if (/hat|card|stamp|color|red|blue|หมวก|ไพ่|แสตมป์|สี|แดง|น้ำเงิน/.test(source)) return "cards";
+  if (/baker|cookie|shelf|bottle|box|cow|rope|ขนม|คุกกี้|ชั้น|ขวด|กล่อง|วัว|เชือก/.test(source)) return "objects";
+  if (/number|sum|mod|weigh|logic|จำนวน|ผลรวม|เลข|ชั่ง|ตรรกะ/.test(source)) return "numbers";
+  return `abstract scene-${Number(question.id || 0) % 6}`;
+}
+
+const WARMUP_PIXEL_ART = {
+  1: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...YYY...RRR...BBB",
+      "...YCY...RCR...BCB",
+      "...YYY...RRR...BBB",
+      "....C.....C.....C.",
+      "...CCC...CCC...CCC",
+      "..CCCC.CCCCC.CCCCC",
+      "...CCC...CCC...CCC",
+      "...C.C...C.C...C.C",
+      "..CC.CC.CC.CC.CC.C",
+      "..................",
+      ".................."
+    ]
+  },
+  2: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...RRR....GGG....Y",
+      "..RYYYR.GCCCG..YYY",
+      "..RYYYR.GCCCG..YYY",
+      "...RRR....GGG....Y",
+      "..................",
+      "..BBBB..BBBB..BBBB",
+      "..BSSB..BSSB..BSSB",
+      "..BSSB..BSSB..BSSB",
+      "..BBBB..BBBB..BBBB",
+      "..................",
+      ".................."
+    ]
+  },
+  3: {
+    cols: 18,
+    rows: [
+      "..................",
+      "....BBBBBBBBBB....",
+      "...BSSSSSSSSSSB...",
+      "...BSSCCCCCCSSB...",
+      "...BSSSSSSSSSSB...",
+      "...BSSCCCCCCSSB...",
+      "...BSSSSSSSSSSB...",
+      "...BBBBBBBBBBBB...",
+      ".......RRRR.......",
+      "......RYYYYR......",
+      ".......RRRR.......",
+      ".................."
+    ]
+  },
+  4: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..GGG........RRR..",
+      ".GCCCG......RCCCR.",
+      ".GCCCG..YYY.RCCCR.",
+      "..GGG..YYYYY.RRR..",
+      ".......YYYYY......",
+      "..BBBB..YYY..BBBB.",
+      "..BSSB......BSSB..",
+      "..BBBB......BBBB..",
+      "..................",
+      "..................",
+      ".................."
+    ]
+  },
+  5: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..BBBBBBBBBBBBBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BRRBYYBGGBRRBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BYYBGGBRRBYYBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BGGBRRBYYBGGBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BBBBBBBBBBBBBB..",
+      "..................",
+      ".................."
+    ]
+  },
+  6: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...BBBB...BBBB....",
+      "...BSSB...BSSB....",
+      "...BBBB...BBBB....",
+      ".....B.....B......",
+      "..BBBBBBBBBBBBBB..",
+      "..BYYBYYBYYBYYBB..",
+      "..BBBBBBBBBBBBBB..",
+      ".....B.....B......",
+      "...BBBB...BBBB....",
+      "...BBBB...BBBB....",
+      ".................."
+    ]
+  },
+  7: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...RRR........BBB.",
+      "..RCCCR......BCCCB",
+      "...RRR........BBB.",
+      "....C..........C..",
+      "..CCCCCCCCCCCCCC..",
+      "....C..........C..",
+      "...RRR........BBB.",
+      "..RCCCR......BCCCB",
+      "...RRR........BBB.",
+      "......YYYYYY......",
+      ".................."
+    ]
+  },
+  8: {
+    cols: 18,
+    rows: [
+      "..................",
+      "....YYY.....RRR...",
+      "...YYYYY...RCCCR..",
+      "....YYY.....RRR...",
+      ".....C.......C....",
+      "..BBBBB...BBBBB...",
+      "..BSSSB...BSSSB...",
+      "..BBBBB...BBBBB...",
+      ".....B.....B......",
+      "......BBBBB.......",
+      ".......BBB........",
+      ".................."
+    ]
+  },
+  9: {
+    cols: 18,
+    rows: [
+      "..................",
+      "....RRR.....BBB...",
+      "...RCCCR...BCCCB..",
+      "....RRR.....BBB...",
+      ".....C.......C....",
+      "....CCC.....CCC...",
+      "...CCCCC...CCCCC..",
+      "....C.C.....C.C...",
+      "..................",
+      "......YYYYYY......",
+      ".......YYYY.......",
+      ".................."
+    ]
+  },
+  10: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..RRR...BBB....YYY",
+      ".RCCCR.BCCCB..YCCY",
+      "..RRR...BBB....YYY",
+      "...C.....C......C.",
+      "..CCC...CCC....CCC",
+      ".CCCC..CCCCC..CCCC",
+      "..C.C...C.C....C.C",
+      "..................",
+      "....BBBBBBBBBB....",
+      "......BBBBBB......",
+      ".................."
+    ]
+  },
+  11: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..BBBBBBBBBBBBBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BSSBSSBSSBSSBB..",
+      "..BBBBBBBBBBBBBB..",
+      ".....GGG..........",
+      "....GCCCG.........",
+      "....GCCCG...RRR...",
+      ".....GGG...RYYR...",
+      "...........RRR....",
+      "..................",
+      ".................."
+    ]
+  },
+  12: {
+    cols: 18,
+    rows: [
+      "..................",
+      "........YYY.......",
+      ".......YYYYY......",
+      "........YYY.......",
+      ".........B........",
+      "........BBB.......",
+      ".......BBBBB......",
+      "......BBBBBBB.....",
+      ".....BBBBBBBBB....",
+      "....BBBBBBBBBBB...",
+      "...BBBBBBBBBBBBB..",
+      ".................."
+    ]
+  },
+  64: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...BBBBBBB........",
+      "...BSSSSSB...YYY..",
+      "...BSSSSSB..YYYYY.",
+      "...BSSSSSB.YYYYYYY",
+      "...BSSSSSB..YYYYY.",
+      "...BBBBBBB...YYY..",
+      "...........RRRR...",
+      "....SSSSSS.RYYR...",
+      "....SYYYYS.RRRR...",
+      "....SSSSSS........",
+      ".................."
+    ]
+  },
+  65: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...WWWW....WWWW...",
+      "..WCCCCW..WCCCCW..",
+      "..WCCCCW..WCCCCW..",
+      "..WWWWWW..WWWWWW..",
+      "..................",
+      ".TTTTTTTTTTTTTTTT.",
+      ".TYYTYYTYYTYYTYYT.",
+      ".TTTTTTTTTTTTTTTT.",
+      ".....PP....PP.....",
+      "....PPPP..PPPP....",
+      ".................."
+    ]
+  },
+  66: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..P...............",
+      "..PP..............",
+      "..PPPP............",
+      "..PPPPPP..........",
+      "..PPPPPPPP........",
+      "..PPPPPPPPPP......",
+      "..PPPPPPPPPPPP....",
+      "..PPPPPPPPPPPPPP..",
+      "..PPPPPPPPPPPPPP..",
+      "....BBBBBBBBBB....",
+      ".................."
+    ]
+  }
+};
+
+const DEFAULT_PIXEL_ART = {
+  people: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...YYY....RRR.....",
+      "...YCY....RCR..BBB",
+      "...YYY....RRR..BCB",
+      "....C......C...BBB",
+      "...CCC....CCC...C.",
+      "..CCCCC..CCCCC.CCC",
+      "...C.C....C.C..C.C",
+      "..................",
+      "....BBBBBBBBBB....",
+      "......BBBBBB......",
+      ".................."
+    ]
+  },
+  path: {
+    cols: 18,
+    rows: [
+      "..................",
+      ".....YYY....RRR...",
+      "....YYYYY..RCCCR..",
+      ".....YYY....RRR...",
+      "......C......C....",
+      "..BBBBBB..BBBBBB..",
+      "..BSSSSB..BSSSSB..",
+      "..BBBBBB..BBBBBB..",
+      "......B....B......",
+      ".......BBBB.......",
+      "........BB........",
+      ".................."
+    ]
+  },
+  money: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...YYYY..YYYY.....",
+      "..YOOOY.YOOOY.....",
+      "...YYYY..YYYY.....",
+      "..................",
+      "..GGGGGGGGGGGGGG..",
+      "..GYYYYYYYYYYYYG..",
+      "..GYYGGYYYYGGYYG..",
+      "..GYYYYYYYYYYYYG..",
+      "..GGGGGGGGGGGGGG..",
+      "..................",
+      ".................."
+    ]
+  },
+  cards: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...RRRR....BBBB...",
+      "..RSSSR...BSSSB...",
+      "..RSYSR...BSYSB...",
+      "..RSSSR...BSSSB...",
+      "...RRRR....BBBB...",
+      "..................",
+      "....YYYYYYYYYY....",
+      "...YSSYSSYSSYY....",
+      "....YYYYYYYYYY....",
+      "..................",
+      ".................."
+    ]
+  },
+  objects: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...BBBB..BBBB.....",
+      "..BSSSB.BSSSB.....",
+      "..BYYB..BYYB......",
+      "...BBBB..BBBB.....",
+      "..................",
+      "..GGGGGGGGGGGGGG..",
+      "..GDDDDDDDDDDDDG..",
+      "..GYYYYYYYYYYYYG..",
+      "..GGGGGGGGGGGGGG..",
+      "..................",
+      ".................."
+    ]
+  },
+  numbers: {
+    cols: 18,
+    rows: [
+      "..................",
+      "...BBBBBBBBBBBB...",
+      "..BSSBSSBSSBSSB...",
+      "..BYYBGGBRRBYYB...",
+      "..BSSBSSBSSBSSB...",
+      "..BGGBRRBYYBGGB...",
+      "..BSSBSSBSSBSSB...",
+      "...BBBBBBBBBBBB...",
+      "......YYYYYY......",
+      ".......YYYY.......",
+      "..................",
+      ".................."
+    ]
+  },
+  transport: {
+    cols: 18,
+    rows: [
+      "..................",
+      "........BBB.......",
+      ".......BBBBB......",
+      "...BBBBBBBBBBBB...",
+      "..BSSSSSSSSSSSB...",
+      "...BBBBBBBBBBBB...",
+      ".....B......B.....",
+      "....BB......BB....",
+      "..................",
+      "..YYYYYYYYYYYYYY..",
+      "...YYYYYYYYYYYY...",
+      ".................."
+    ]
+  },
+  race: {
+    cols: 18,
+    rows: [
+      "..................",
+      "..RRR........BBB..",
+      ".RCCCR......BCCCB.",
+      "..RRR........BBB..",
+      "..CCC........CCC..",
+      ".CCCCC......CCCCC.",
+      "..C.C........C.C..",
+      "..................",
+      "..BBBBBBBBBBBBBB..",
+      "...YYYYYYYYYYYY...",
+      "..................",
+      ".................."
+    ]
+  },
+  nature: {
+    cols: 18,
+    rows: [
+      "..................",
+      ".......BBBB.......",
+      "......BCCCCB......",
+      ".....BCCCCCCB.....",
+      "......BCCCCB......",
+      ".......BBBB.......",
+      "..................",
+      "..YYYYYYYYYYYYYY..",
+      "...YYYYYYYYYYYY...",
+      "....GGGGGGGGGG....",
+      "..................",
+      ".................."
+    ]
+  },
+  abstract: {
+    cols: 18,
+    rows: [
+      "..................",
+      "....BBB....YYY....",
+      "...BSSB...YSSY....",
+      "....BBB....YYY....",
+      "......B....Y......",
+      "..RRRRRRRRRRRRRR..",
+      "..RYYRYYRYYRYYRR..",
+      "..RRRRRRRRRRRRRR..",
+      "......G....G......",
+      "....GGG....GGG....",
+      "..................",
+      ".................."
+    ]
+  }
+};
+
+function getDefaultPixelArt(sceneType) {
+  if (/money|coin|salary|banknote|pirate|hotel/.test(sceneType)) return DEFAULT_PIXEL_ART.money;
+  if (/card|stamp|sticker|hat|birthday|ball/.test(sceneType)) return DEFAULT_PIXEL_ART.cards;
+  if (/people|villager|suspect|island|dragon|bar|muddy|messy/.test(sceneType)) return DEFAULT_PIXEL_ART.people;
+  if (/path|road|stair|heaven|lock/.test(sceneType)) return DEFAULT_PIXEL_ART.path;
+  if (/boat|ship|plane/.test(sceneType)) return DEFAULT_PIXEL_ART.transport;
+  if (/horse|race|runner|sport|pingpong|truel/.test(sceneType)) return DEFAULT_PIXEL_ART.race;
+  if (/box|fruit|apple|restaurant|product|baker|bottle|cookie|cow|rope/.test(sceneType)) return DEFAULT_PIXEL_ART.objects;
+  if (/number|code|age|weigh|scale|vote|election|round|companies|calendar|book|error|stone/.test(sceneType)) return DEFAULT_PIXEL_ART.numbers;
+  if (/bear|desert/.test(sceneType)) return DEFAULT_PIXEL_ART.nature;
+  return DEFAULT_PIXEL_ART.abstract;
+}
+
+function buildWarmupPixelArt(question, sceneType) {
+  const art = WARMUP_PIXEL_ART[Number(question.id)] || getDefaultPixelArt(sceneType);
+  if (!art) return "";
+
+  return art.rows.flatMap((row, rowIndex) =>
+    Array.from(row).map((token, colIndex) => {
+      const className = token === "." ? "empty" : token.toLowerCase();
+      return `<span class="pixel-art-cell ${className}" style="--row:${rowIndex};--col:${colIndex};"></span>`;
+    })
+  ).join("");
+}
+
+function buildQuestionPixelScene(question, questionNumber) {
+  const sceneType = getQuestionSceneType(question);
+  const warmupArt = buildWarmupPixelArt(question, sceneType);
+  const warmupConfig = WARMUP_PIXEL_ART[Number(question.id)] || getDefaultPixelArt(sceneType);
+  const tiles = warmupArt ? "" : Array.from({ length: 24 }, (_, index) => `<span class="pixel-scene-tile tile-${index + 1}"></span>`).join("");
+  const pieces = warmupArt ? "" : Array.from({ length: 8 }, (_, index) => `<span class="pixel-scene-piece piece-${index + 1}"></span>`).join("");
+  const label = escapeAttribute(`${openmindTranslate("quiz.questionNumber", { num: questionNumber })}: ${question.title}`);
+
+  return `
+    <div class="quiz-pixel-scene ${sceneType}${warmupArt ? " has-mosaic" : ""}" role="img" aria-label="${label}">
+      <div class="pixel-scene-grid" ${warmupConfig ? `style="--cols:${warmupConfig.cols};--rows:${warmupConfig.rows.length};"` : ""} aria-hidden="true">
+        ${tiles}
+        ${pieces}
+        ${warmupArt}
+      </div>
+    </div>
+  `;
 }
 
 function initQuiz() {
@@ -5496,7 +6019,6 @@ function renderQuestion() {
 
   sectionHeaderEl.innerHTML = `
     <div class="quiz-section-banner">
-      <p class="openmind-eyebrow">🧠 openmind</p>
       <span class="quiz-section-counter">${counterText}</span>
     </div>
     <h2 class="quiz-section-title">${section.title}</h2>
@@ -5512,7 +6034,7 @@ function renderQuestion() {
   ).join("");
   const difficultyLabel = openmindTranslate("quiz.difficulty", { value: q.difficulty });
 
-  const diagramHtml = q.diagram ? `<div class="quiz-diagram-wrap">${pixelizeDiagramMarkup(q.diagram)}</div>` : "";
+  const pixelSceneHtml = buildQuestionPixelScene(q, qNum);
   const choicesHtml = Array.isArray(q.choices)
     ? `
       <div class="quiz-choice-list" role="list" aria-label="${openmindTranslate("quiz.answerChoices")}">
@@ -5555,7 +6077,7 @@ function renderQuestion() {
       </div>
       <h3 class="quiz-q-title">${q.title}</h3>
     </div>
-    ${diagramHtml}
+    ${pixelSceneHtml}
     <div class="quiz-q-text">${q.question}</div>
     ${choicesHtml}
   `;
@@ -5589,7 +6111,6 @@ function renderQuestion() {
 
   renderFeedback(q, savedState);
   renderAnswer(q, savedState);
-  applyTwemoji(document.getElementById("openmindContent"));
 }
 
 function renderSectionSwitcher() {
@@ -5748,10 +6269,6 @@ function renderFeedback(q, savedState) {
 }
 
 function renderAnswer(q, savedState) {
-  const answerDiagramHtml = q.answerDiagram
-    ? `<div class="quiz-diagram-wrap">${pixelizeDiagramMarkup(q.answerDiagram)}</div>`
-    : "";
-
   const answerEl = document.getElementById("quizAnswer");
   if (!savedState?.checked) {
     answerEl.hidden = true;
@@ -5764,7 +6281,6 @@ function renderAnswer(q, savedState) {
       <div class="quiz-answer-label">${openmindTranslate("quiz.answerLabel")}</div>
       <div class="quiz-answer-text">${q.answer}</div>
     </div>
-    ${answerDiagramHtml}
     <div class="quiz-explanation">
       <div class="quiz-explanation-title">${openmindTranslate("quiz.explanationLabel")}</div>
       ${q.explanation}
@@ -5814,8 +6330,7 @@ function showCompletion() {
   content.innerHTML = `
     <div class="openmind-content-card quiz-shell">
       <div class="quiz-complete">
-        <div class="quiz-complete-icon">🧠</div>
-        <p class="openmind-eyebrow">🧠 openmind</p>
+        <div class="quiz-complete-icon" aria-hidden="true"><span class="pixel-brain-mark"></span></div>
         <h2 class="quiz-complete-title">${hasNextSection ? openmindTranslate("quiz.completionTitle", { section: section.title }) : openmindTranslate("quiz.completionAllTitle")}</h2>
         <p class="quiz-complete-text">${hasNextSection ? openmindTranslate("quiz.completionCopy", { section: section.title, count: section.questions.length }) : openmindTranslate("quiz.completionAllCopy", { count: QUIZ_SECTIONS.reduce((sum, current) => sum + current.questions.length, 0) })}<br>
         ${hasNextSection ? openmindTranslate("quiz.completionNext") : openmindTranslate("quiz.completionDone")}</p>
@@ -5849,7 +6364,6 @@ function showCompletion() {
       jumpToQuestion(Number(button.dataset.completeJump));
     });
   });
-  applyTwemoji(content);
 }
 
 onOpenmindLanguageChange(() => {
