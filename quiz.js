@@ -1,5 +1,5 @@
-const NOTSODUMB_LANGUAGE_KEY = "notsodumb-language";
-const NOTSODUMB_DICTIONARY = {
+const OPENMIND_LANGUAGE_KEY = "openmind-language";
+const OPENMIND_DICTIONARY = {
   th: {
     ui: {
       toggleLabel: "สลับภาษา"
@@ -76,35 +76,35 @@ const NOTSODUMB_DICTIONARY = {
   }
 };
 
-const notsodumbLanguageListeners = new Set();
+const openmindLanguageListeners = new Set();
 
-function getNotsodumbLanguage() {
-  const saved = localStorage.getItem(NOTSODUMB_LANGUAGE_KEY);
-  return saved === "en" ? "en" : "th";
+function getOpenmindLanguage() {
+  const saved = localStorage.getItem(OPENMIND_LANGUAGE_KEY);
+  return saved === "th" ? "th" : "en";
 }
 
-function applyNotsodumbLanguage(lang) {
+function applyOpenmindLanguage(lang) {
   document.documentElement.lang = lang === "en" ? "en" : "th";
-  document.documentElement.setAttribute("data-notsodumb-lang", lang);
+  document.documentElement.setAttribute("data-openmind-lang", lang);
 }
 
-function notsodumbTranslate(path, vars = {}) {
-  const lang = getNotsodumbLanguage();
-  const source = NOTSODUMB_DICTIONARY[lang] || NOTSODUMB_DICTIONARY.th;
+function openmindTranslate(path, vars = {}) {
+  const lang = getOpenmindLanguage();
+  const source = OPENMIND_DICTIONARY[lang] || OPENMIND_DICTIONARY.th;
   const template = path.split(".").reduce((current, key) => current?.[key], source) || path;
   return String(template).replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? "");
 }
 
-function setNotsodumbLanguage(lang) {
+function setOpenmindLanguage(lang) {
   const nextLang = lang === "en" ? "en" : "th";
-  localStorage.setItem(NOTSODUMB_LANGUAGE_KEY, nextLang);
-  applyNotsodumbLanguage(nextLang);
-  notsodumbLanguageListeners.forEach((listener) => listener(nextLang));
+  localStorage.setItem(OPENMIND_LANGUAGE_KEY, nextLang);
+  applyOpenmindLanguage(nextLang);
+  openmindLanguageListeners.forEach((listener) => listener(nextLang));
 }
 
-function onNotsodumbLanguageChange(listener) {
-  notsodumbLanguageListeners.add(listener);
-  return () => notsodumbLanguageListeners.delete(listener);
+function onOpenmindLanguageChange(listener) {
+  openmindLanguageListeners.add(listener);
+  return () => openmindLanguageListeners.delete(listener);
 }
 
 function localizeValue(value) {
@@ -114,20 +114,20 @@ function localizeValue(value) {
     !Array.isArray(value) &&
     ("th" in value || "en" in value)
   ) {
-    const lang = getNotsodumbLanguage();
+    const lang = getOpenmindLanguage();
     return value[lang] ?? value.th ?? value.en ?? "";
   }
 
   return value;
 }
 
-applyNotsodumbLanguage(getNotsodumbLanguage());
+applyOpenmindLanguage(getOpenmindLanguage());
 
-window.notsodumbI18n = {
-  getLanguage: getNotsodumbLanguage,
-  setLanguage: setNotsodumbLanguage,
-  t: notsodumbTranslate,
-  onChange: onNotsodumbLanguageChange,
+window.openmindI18n = {
+  getLanguage: getOpenmindLanguage,
+  setLanguage: setOpenmindLanguage,
+  t: openmindTranslate,
+  onChange: onOpenmindLanguageChange,
   localizeValue
 };
 
@@ -5337,14 +5337,14 @@ function getLocalizedSection(section) {
 }
 
 function getLocalizedQuestion(question) {
-  const lang = getNotsodumbLanguage();
+  const lang = getOpenmindLanguage();
   const translatedQuestion = QUESTION_TRANSLATIONS[lang]?.[question.id] || {};
   const explanationOverride =
     ADDITIONAL_EXPLANATION_OVERRIDES[lang]?.[question.id] ||
     QUESTION_EXPLANATION_OVERRIDES[lang]?.[question.id];
   const localizedChoices =
     translatedQuestion.choices ||
-    question.choicesI18n?.[getNotsodumbLanguage()] ||
+    question.choicesI18n?.[getOpenmindLanguage()] ||
     question.choices;
   return {
     ...question,
@@ -5452,23 +5452,20 @@ function pixelizeDiagramMarkup(markup) {
 }
 
 function initQuiz() {
-  const content = document.getElementById("notsodumbContent");
+  const content = document.getElementById("openmindContent");
   content.innerHTML = `
-    <div class="notsodumb-content-card quiz-shell">
-      <div class="quiz-topbar">
-        <div id="notsodumbLangMount" class="notsodumb-lang-mount"></div>
-      </div>
+    <div class="openmind-content-card quiz-shell">
       <div id="quizSectionHeader" class="quiz-section-header"></div>
       <div class="quiz-progress-wrap">
-        <div class="quiz-jump-nav" id="quizJumpNav" aria-label="${notsodumbTranslate("quiz.questionPicker")}"></div>
+        <div class="quiz-jump-nav" id="quizJumpNav" aria-label="${openmindTranslate("quiz.questionPicker")}"></div>
       </div>
       <div id="quizQuestion" class="quiz-question-block"></div>
       <div id="quizFeedback" class="quiz-feedback" hidden></div>
       <div id="quizAnswer" class="quiz-answer-block" hidden></div>
       <div class="quiz-actions">
-        <button class="quiz-btn-secondary" id="quizPrevBtn" hidden>${notsodumbTranslate("quiz.previous")}</button>
-        <button class="notsodumb-button quiz-btn-reveal" id="quizRevealBtn" disabled>${notsodumbTranslate("quiz.revealCheck")}</button>
-        <button class="notsodumb-button quiz-btn-next" id="quizNextBtn" hidden>${notsodumbTranslate("quiz.next")}</button>
+        <button class="quiz-btn-secondary" id="quizPrevBtn" hidden>${openmindTranslate("quiz.previous")}</button>
+        <button class="openmind-button quiz-btn-reveal" id="quizRevealBtn" disabled>${openmindTranslate("quiz.revealCheck")}</button>
+        <button class="openmind-button quiz-btn-next" id="quizNextBtn" hidden>${openmindTranslate("quiz.next")}</button>
       </div>
     </div>
   `;
@@ -5483,10 +5480,6 @@ function initQuiz() {
   revealBtn.addEventListener("click", revealAnswer);
   nextBtn.addEventListener("click", nextQuestion);
   prevBtn.addEventListener("click", prevQuestion);
-
-  if (typeof window.mountNotsodumbLanguageToggle === "function") {
-    window.mountNotsodumbLanguageToggle();
-  }
 
   renderQuestion();
 }
@@ -5503,12 +5496,12 @@ function renderQuestion() {
 
   sectionHeaderEl.innerHTML = `
     <div class="quiz-section-banner">
-      <p class="notsodumb-eyebrow">🧠 notsodumb</p>
+      <p class="openmind-eyebrow">🧠 openmind</p>
       <span class="quiz-section-counter">${counterText}</span>
     </div>
     <h2 class="quiz-section-title">${section.title}</h2>
     <p class="quiz-section-desc">${section.description}</p>
-    <div class="quiz-section-switcher" id="quizSectionSwitcher" aria-label="${notsodumbTranslate("quiz.sectionPicker")}"></div>
+    <div class="quiz-section-switcher" id="quizSectionSwitcher" aria-label="${openmindTranslate("quiz.sectionPicker")}"></div>
   `;
 
   renderSectionSwitcher();
@@ -5517,12 +5510,12 @@ function renderQuestion() {
   const stars = Array.from({ length: 5 }, (_, i) =>
     `<span class="${i < q.difficulty ? "star filled" : "star"}">★</span>`
   ).join("");
-  const difficultyLabel = notsodumbTranslate("quiz.difficulty", { value: q.difficulty });
+  const difficultyLabel = openmindTranslate("quiz.difficulty", { value: q.difficulty });
 
   const diagramHtml = q.diagram ? `<div class="quiz-diagram-wrap">${pixelizeDiagramMarkup(q.diagram)}</div>` : "";
   const choicesHtml = Array.isArray(q.choices)
     ? `
-      <div class="quiz-choice-list" role="list" aria-label="${notsodumbTranslate("quiz.answerChoices")}">
+      <div class="quiz-choice-list" role="list" aria-label="${openmindTranslate("quiz.answerChoices")}">
         ${q.choices
           .map((choice, index) => {
             const isSelected = selectedChoice === index;
@@ -5538,7 +5531,7 @@ function renderQuestion() {
             return `
               <button
                 type="button"
-                class="notsodumb-option quiz-choice${stateClass}"
+                class="openmind-option quiz-choice${stateClass}"
                 data-choice-index="${index}"
                 aria-pressed="${isSelected ? "true" : "false"}"
                 ${checked ? "disabled" : ""}
@@ -5555,7 +5548,7 @@ function renderQuestion() {
   questionEl.innerHTML = `
     <div class="quiz-q-header">
       <div class="quiz-q-meta">
-        <span class="quiz-q-num">${notsodumbTranslate("quiz.questionNumber", { num: qNum })}</span>
+        <span class="quiz-q-num">${openmindTranslate("quiz.questionNumber", { num: qNum })}</span>
         <div class="quiz-q-difficulty">
           <span class="quiz-q-stars" aria-label="${difficultyLabel}">${stars}</span>
         </div>
@@ -5579,24 +5572,24 @@ function renderQuestion() {
   });
 
   prevBtn.hidden = quizState.currentQuestion === 0;
-  prevBtn.textContent = notsodumbTranslate("quiz.previous");
+  prevBtn.textContent = openmindTranslate("quiz.previous");
   revealBtn.hidden = false;
   const hasChoices = Array.isArray(q.choices) && q.choices.length > 0;
   revealBtn.disabled = hasChoices ? selectedChoice === undefined || checked : checked;
   revealBtn.textContent = checked
-    ? notsodumbTranslate("quiz.revealOpened")
+    ? openmindTranslate("quiz.revealOpened")
     : hasChoices
-      ? notsodumbTranslate("quiz.revealCheck")
-      : notsodumbTranslate("quiz.revealOpen");
+      ? openmindTranslate("quiz.revealCheck")
+      : openmindTranslate("quiz.revealOpen");
   nextBtn.hidden = !checked;
   nextBtn.textContent = quizState.currentQuestion < totalQ - 1
-    ? notsodumbTranslate("quiz.next")
-    : notsodumbTranslate("quiz.finishSection", { section: section.title });
+    ? openmindTranslate("quiz.next")
+    : openmindTranslate("quiz.finishSection", { section: section.title });
   quizState.revealed = checked;
 
   renderFeedback(q, savedState);
   renderAnswer(q, savedState);
-  applyTwemoji(document.getElementById("notsodumbContent"));
+  applyTwemoji(document.getElementById("openmindContent"));
 }
 
 function renderSectionSwitcher() {
@@ -5658,8 +5651,8 @@ function renderJumpNav(totalQ) {
       .filter(Boolean)
       .join(" ");
     const label = isCompleted
-      ? notsodumbTranslate("quiz.questionDone", { num: index + 1 })
-      : notsodumbTranslate("quiz.questionNumber", { num: index + 1 });
+      ? openmindTranslate("quiz.questionDone", { num: index + 1 })
+      : openmindTranslate("quiz.questionNumber", { num: index + 1 });
 
     return `
       <button
@@ -5729,11 +5722,11 @@ function renderFeedback(q, savedState) {
   const correctText = q.choices?.[q.correctChoice] || q.answer;
   const statusClass = savedState.isCorrect ? "is-correct" : "is-wrong";
   const title = savedState.isCorrect
-    ? notsodumbTranslate("quiz.feedbackCorrect")
-    : notsodumbTranslate("quiz.feedbackWrong");
+    ? openmindTranslate("quiz.feedbackCorrect")
+    : openmindTranslate("quiz.feedbackWrong");
   const copy = savedState.isCorrect
-    ? notsodumbTranslate("quiz.feedbackCorrectCopy")
-    : notsodumbTranslate("quiz.feedbackWrongCopy");
+    ? openmindTranslate("quiz.feedbackCorrectCopy")
+    : openmindTranslate("quiz.feedbackWrongCopy");
 
   feedbackEl.innerHTML = `
     <div class="quiz-feedback-card ${statusClass}">
@@ -5741,11 +5734,11 @@ function renderFeedback(q, savedState) {
       <p class="quiz-feedback-copy">${copy}</p>
       <div class="quiz-feedback-rows">
         <div class="quiz-feedback-row">
-          <span class="quiz-feedback-label">${notsodumbTranslate("quiz.yourAnswer")}</span>
+          <span class="quiz-feedback-label">${openmindTranslate("quiz.yourAnswer")}</span>
           <span class="quiz-feedback-value">${chosenText}</span>
         </div>
         <div class="quiz-feedback-row">
-          <span class="quiz-feedback-label">${notsodumbTranslate("quiz.correctAnswer")}</span>
+          <span class="quiz-feedback-label">${openmindTranslate("quiz.correctAnswer")}</span>
           <span class="quiz-feedback-value">${correctText}</span>
         </div>
       </div>
@@ -5768,12 +5761,12 @@ function renderAnswer(q, savedState) {
 
   answerEl.innerHTML = `
     <div class="quiz-answer-box">
-      <div class="quiz-answer-label">${notsodumbTranslate("quiz.answerLabel")}</div>
+      <div class="quiz-answer-label">${openmindTranslate("quiz.answerLabel")}</div>
       <div class="quiz-answer-text">${q.answer}</div>
     </div>
     ${answerDiagramHtml}
     <div class="quiz-explanation">
-      <div class="quiz-explanation-title">${notsodumbTranslate("quiz.explanationLabel")}</div>
+      <div class="quiz-explanation-title">${openmindTranslate("quiz.explanationLabel")}</div>
       ${q.explanation}
     </div>
   `;
@@ -5809,7 +5802,7 @@ function showCompletion() {
           type="button"
           class="quiz-jump-btn is-completed"
           data-complete-jump="${index}"
-          aria-label="${notsodumbTranslate("quiz.replayQuestion", { num: index + 1 })}"
+          aria-label="${openmindTranslate("quiz.replayQuestion", { num: index + 1 })}"
         >
           ${index + 1}
         </button>
@@ -5817,30 +5810,24 @@ function showCompletion() {
     )
     .join("");
 
-  const content = document.getElementById("notsodumbContent");
+  const content = document.getElementById("openmindContent");
   content.innerHTML = `
-    <div class="notsodumb-content-card quiz-shell">
+    <div class="openmind-content-card quiz-shell">
       <div class="quiz-complete">
-        <div class="quiz-topbar">
-          <div id="notsodumbLangMount" class="notsodumb-lang-mount"></div>
-        </div>
         <div class="quiz-complete-icon">🧠</div>
-        <p class="notsodumb-eyebrow">🧠 notsodumb</p>
-        <h2 class="quiz-complete-title">${hasNextSection ? notsodumbTranslate("quiz.completionTitle", { section: section.title }) : notsodumbTranslate("quiz.completionAllTitle")}</h2>
-        <p class="quiz-complete-text">${hasNextSection ? notsodumbTranslate("quiz.completionCopy", { section: section.title, count: section.questions.length }) : notsodumbTranslate("quiz.completionAllCopy", { count: QUIZ_SECTIONS.reduce((sum, current) => sum + current.questions.length, 0) })}<br>
-        ${hasNextSection ? notsodumbTranslate("quiz.completionNext") : notsodumbTranslate("quiz.completionDone")}</p>
+        <p class="openmind-eyebrow">🧠 openmind</p>
+        <h2 class="quiz-complete-title">${hasNextSection ? openmindTranslate("quiz.completionTitle", { section: section.title }) : openmindTranslate("quiz.completionAllTitle")}</h2>
+        <p class="quiz-complete-text">${hasNextSection ? openmindTranslate("quiz.completionCopy", { section: section.title, count: section.questions.length }) : openmindTranslate("quiz.completionAllCopy", { count: QUIZ_SECTIONS.reduce((sum, current) => sum + current.questions.length, 0) })}<br>
+        ${hasNextSection ? openmindTranslate("quiz.completionNext") : openmindTranslate("quiz.completionDone")}</p>
         <div class="quiz-complete-nav">
-          <p class="quiz-complete-nav-label">${notsodumbTranslate("quiz.completionReplayLabel")}</p>
+          <p class="quiz-complete-nav-label">${openmindTranslate("quiz.completionReplayLabel")}</p>
           <div class="quiz-jump-nav">${completeNav}</div>
         </div>
-        ${hasNextSection ? `<button class="notsodumb-button" id="quizNextSectionBtn">${notsodumbTranslate("quiz.nextSection", { section: getLocalizedSection(QUIZ_SECTIONS[quizState.currentSection + 1]).title })}</button>` : ""}
-        <button class="notsodumb-button" id="quizRestartBtn">${notsodumbTranslate("quiz.restart")}</button>
+        ${hasNextSection ? `<button class="openmind-button" id="quizNextSectionBtn">${openmindTranslate("quiz.nextSection", { section: getLocalizedSection(QUIZ_SECTIONS[quizState.currentSection + 1]).title })}</button>` : ""}
+        <button class="openmind-button" id="quizRestartBtn">${openmindTranslate("quiz.restart")}</button>
       </div>
     </div>
   `;
-  if (typeof window.mountNotsodumbLanguageToggle === "function") {
-    window.mountNotsodumbLanguageToggle();
-  }
   document.getElementById("quizRestartBtn").addEventListener("click", () => {
     quizState.currentQuestion = 0;
     quizState.answeredBySection[quizState.currentSection] = [];
@@ -5865,13 +5852,13 @@ function showCompletion() {
   applyTwemoji(content);
 }
 
-onNotsodumbLanguageChange(() => {
+onOpenmindLanguageChange(() => {
   if (document.getElementById("quizRestartBtn")) {
     showCompletion();
     return;
   }
 
-  if (document.getElementById("notsodumbContent")) {
+  if (document.getElementById("openmindContent")) {
     initQuiz();
   }
 });

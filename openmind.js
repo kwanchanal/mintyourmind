@@ -1,9 +1,9 @@
-const langToggle = document.getElementById("notsodumbLangToggle");
-const langButtons = Array.from(document.querySelectorAll(".notsodumb-lang-btn"));
+const langToggle = document.getElementById("openmindLangToggle");
+const langButtons = Array.from(document.querySelectorAll(".openmind-lang-btn"));
 
 function getTranslator() {
-  return window.notsodumbI18n || {
-    getLanguage: () => "th",
+  return window.openmindI18n || {
+    getLanguage: () => "en",
     setLanguage: () => {},
     t: (key) => key,
     onChange: () => {}
@@ -23,12 +23,6 @@ function renderLanguageToggle() {
   langToggle?.setAttribute("aria-label", i18n.t("ui.toggleLabel"));
 }
 
-function mountLanguageToggle() {
-  const mountPoint = document.getElementById("notsodumbLangMount");
-  if (!mountPoint || !langToggle) return;
-  mountPoint.appendChild(langToggle);
-}
-
 langButtons.forEach((button) => {
   button.addEventListener("click", () => {
     getTranslator().setLanguage(button.dataset.lang);
@@ -40,9 +34,6 @@ getTranslator().onChange(() => {
 });
 
 renderLanguageToggle();
-mountLanguageToggle();
-
-window.mountNotsodumbLanguageToggle = mountLanguageToggle;
 
 if (typeof initQuiz === "function") {
   initQuiz();
