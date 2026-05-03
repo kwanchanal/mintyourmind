@@ -163,8 +163,8 @@ const QUIZ_SECTIONS = [
   {
     id: "ทดลอง",
     label: {
-      th: "บททดลอง",
-      en: "Warm-Up"
+      th: "Warmup",
+      en: "Warmup"
     },
     title: {
       th: "บททดลอง: อุ่นเครื่องสมอง",
@@ -311,8 +311,8 @@ At what minute is the shelf <strong>half full</strong>?`
   {
     id: 1,
     label: {
-      th: "บทที่ 1",
-      en: "Chapter 1"
+      th: "Reasoning",
+      en: "Reasoning"
     },
     title: {
       th: "บทที่ 1: การคิดเชิงตรรกะ",
@@ -1076,8 +1076,8 @@ At what minute is the shelf <strong>half full</strong>?`
   {
     id: 2,
     label: {
-      th: "บทที่ 2",
-      en: "Chapter 2"
+      th: "Pattern",
+      en: "Pattern"
     },
     title: {
       th: "บทที่ 2: การคิดอย่างมีวิจารณญาณ",
@@ -1435,8 +1435,8 @@ C พูดว่า: "ฉันบริสุทธิ์" / "A เป็น�
   {
     id: 3,
     label: {
-      th: "บทที่ 3",
-      en: "Chapter 3"
+      th: "Bias",
+      en: "Bias"
     },
     title: {
       th: "บทที่ 3: การคิดนอกกรอบ",
@@ -1742,8 +1742,8 @@ C พูดว่า: "ฉันบริสุทธิ์" / "A เป็น�
   {
     id: 4,
     label: {
-      th: "บทที่ 4",
-      en: "Chapter 4"
+      th: "Decision",
+      en: "Decision"
     },
     title: {
       th: "บทที่ 4: คิดจากภาพรวม",
@@ -2112,8 +2112,8 @@ G: ใช่, 2, 2
   {
     id: 5,
     label: {
-      th: "บทที่ 5",
-      en: "Chapter 5"
+      th: "Strategy",
+      en: "Strategy"
     },
     title: {
       th: "บทที่ 5: คิดหลายแง่มุมให้เป็น",
@@ -5375,7 +5375,7 @@ const quizState = {
 
 // DOM references
 let questionEl, progressEl, progressTextEl, revealBtn, nextBtn, prevBtn, sectionHeaderEl, brainHudEl;
-let isBrainProfileOpen = false;
+let isHudCollapsed = false;
 
 function getQuestionState() {
   return getCurrentAnswers()[quizState.currentQuestion] || null;
@@ -6019,13 +6019,14 @@ function renderBrainHud(state = {}) {
   const delta = state.delta ?? "+3";
   const percentile = state.percentile ?? 38;
   const message = state.message || "Your Brain Profile is forming...";
-  const profileClass = isBrainProfileOpen ? " is-profile-open" : "";
+  const collapsedClass = isHudCollapsed ? " is-collapsed" : "";
 
-  brainHudEl.className = `brain-score-hud is-${status}${profileClass}`;
+  brainHudEl.className = `brain-score-hud is-${status} is-profile-open${collapsedClass}`;
   brainHudEl.innerHTML = `
     <div class="brain-hud-top">
       <span class="brain-hud-guest">Hi, Guest</span>
       <span class="brain-hud-status">${message}</span>
+      <button type="button" class="brain-hud-collapse-btn" data-hud-collapse aria-label="Toggle HUD">${isHudCollapsed ? "▲" : "▼"}</button>
     </div>
     <div class="brain-hud-main">
       <div class="brain-hud-score">
@@ -6034,7 +6035,7 @@ function renderBrainHud(state = {}) {
         <span class="brain-hud-delta">↑ ${delta}</span>
       </div>
       <p class="brain-hud-percentile">You’re ahead of ${percentile}% of players</p>
-      <button type="button" class="brain-hud-profile-btn" data-brain-profile-toggle>View Profile</button>
+      <button type="button" class="brain-hud-profile-btn">Log in</button>
     </div>
     <div class="brain-hud-profile" id="brainHudProfile">
       <p class="brain-profile-title">Your Brain Profile is forming...</p>
@@ -6045,9 +6046,10 @@ function renderBrainHud(state = {}) {
     </div>
   `;
 
-  brainHudEl.querySelector("[data-brain-profile-toggle]")?.addEventListener("click", () => {
-    isBrainProfileOpen = !isBrainProfileOpen;
-    brainHudEl.classList.toggle("is-profile-open", isBrainProfileOpen);
+  brainHudEl.querySelector("[data-hud-collapse]")?.addEventListener("click", () => {
+    isHudCollapsed = !isHudCollapsed;
+    brainHudEl.classList.toggle("is-collapsed", isHudCollapsed);
+    brainHudEl.querySelector("[data-hud-collapse]").textContent = isHudCollapsed ? "▲" : "▼";
   });
 }
 
