@@ -5374,7 +5374,8 @@ const quizState = {
 };
 
 // DOM references
-let questionEl, progressEl, progressTextEl, revealBtn, nextBtn, prevBtn, sectionHeaderEl;
+let questionEl, progressEl, progressTextEl, revealBtn, nextBtn, prevBtn, sectionHeaderEl, brainHudEl;
+let isBrainProfileOpen = false;
 
 function getQuestionState() {
   return getCurrentAnswers()[quizState.currentQuestion] || null;
@@ -5991,6 +5992,7 @@ function initQuiz() {
         <button class="openmind-button quiz-btn-next" id="quizNextBtn" hidden>${openmindTranslate("quiz.next")}</button>
       </div>
     </div>
+    <aside class="brain-score-hud" id="brainScoreHud" aria-live="polite"></aside>
   `;
 
   questionEl = document.getElementById("quizQuestion");
@@ -5999,12 +6001,77 @@ function initQuiz() {
   nextBtn = document.getElementById("quizNextBtn");
   prevBtn = document.getElementById("quizPrevBtn");
   sectionHeaderEl = document.getElementById("quizSectionHeader");
+  brainHudEl = document.getElementById("brainScoreHud");
 
   revealBtn.addEventListener("click", revealAnswer);
   nextBtn.addEventListener("click", nextQuestion);
   prevBtn.addEventListener("click", prevQuestion);
 
+  renderBrainHud();
   renderQuestion();
+}
+
+function renderBrainHud(state = {}) {
+  if (!brainHudEl) return;
+
+  const status = state.status || "idle";
+  const score = state.score ?? 62;
+  const delta = state.delta ?? "+3";
+  const percentile = state.percentile ?? 38;
+  const message = state.message || "Your Brain Profile is forming...";
+  const profileClass = isBrainProfileOpen ? " is-profile-open" : "";
+
+  brainHudEl.className = `brain-score-hud is-${status}${profileClass}`;
+  brainHudEl.innerHTML = `
+    <div class="brain-hud-top">
+      <span class="brain-hud-guest">Hi, Guest</span>
+      <span class="brain-hud-status">${message}</span>
+    </div>
+    <div class="brain-hud-main">
+      <div class="brain-hud-score">
+        <span class="brain-hud-label">Score</span>
+        <strong>${score}</strong>
+        <span class="brain-hud-delta">↑ ${delta}</span>
+      </div>
+      <p class="brain-hud-percentile">You’re ahead of ${percentile}% of players</p>
+      <button type="button" class="brain-hud-profile-btn" data-brain-profile-toggle>View Profile</button>
+    </div>
+    <div class="brain-hud-profile" id="brainHudProfile">
+      <p class="brain-profile-title">Your Brain Profile is forming...</p>
+      <div class="brain-profile-row"><span>Logic</span><strong>███████░░</strong><em>7.2</em></div>
+      <div class="brain-profile-row"><span>Pattern</span><strong>█████░░░░</strong><em>5.1</em></div>
+      <div class="brain-profile-row"><span>Bias</span><strong>████░░░░░</strong><em>4.3</em></div>
+      <p class="brain-profile-insight">You tend to rely on intuition.</p>
+    </div>
+  `;
+
+  brainHudEl.querySelector("[data-brain-profile-toggle]")?.addEventListener("click", () => {
+    isBrainProfileOpen = !isBrainProfileOpen;
+    brainHudEl.classList.toggle("is-profile-open", isBrainProfileOpen);
+  });
+}
+
+function updateBrainHudAfterAnswer(isCorrect) {
+  renderBrainHud({
+    status: isCorrect ? "correct" : "wrong",
+    score: isCorrect ? 65 : 62,
+    delta: isCorrect ? "+3" : "+0",
+    percentile: isCorrect ? 41 : 38,
+    message: isCorrect ? "+3 Logic improved" : "Trap detected: check your assumption"
+  });
+}
+
+function updateBrainHudForCompletion() {
+  const currentSection = QUIZ_SECTIONS[quizState.currentSection];
+  if (currentSection?.id !== "ทดลอง") return;
+
+  renderBrainHud({
+    status: "complete",
+    score: 65,
+    delta: "+3",
+    percentile: 41,
+    message: "Warm-Up complete. Your Brain Profile is forming..."
+  });
 }
 
 function renderQuestion() {
@@ -6227,6 +6294,7 @@ function revealAnswer() {
   });
   quizState.revealed = true;
 
+  updateBrainHudAfterAnswer(isCorrect);
   renderQuestion();
   document.getElementById("quizAnswer").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -6309,6 +6377,7 @@ function prevQuestion() {
 }
 
 function showCompletion() {
+  updateBrainHudForCompletion();
   const section = getLocalizedSection(QUIZ_SECTIONS[quizState.currentSection]);
   const hasNextSection = quizState.currentSection < QUIZ_SECTIONS.length - 1;
   const completeNav = section.questions

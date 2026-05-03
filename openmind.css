@@ -3328,6 +3328,10 @@ body {
   justify-content: flex-end;
 }
 
+.openmind-page:not(.openmind-is-landing) .openmind-shell {
+  padding-bottom: 118px;
+}
+
 .openmind-is-landing .openmind-home-btn {
   display: none;
 }
@@ -3725,6 +3729,163 @@ body {
   box-shadow: 2px 2px 0 #0f3674;
 }
 
+.brain-score-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  z-index: 30;
+  display: grid;
+  gap: 8px;
+  width: min(calc(100% - 28px), 520px);
+  padding: 10px 12px;
+  border: 2px solid #0b1020;
+  border-radius: 0;
+  background: var(--brain-accent-strong);
+  color: #ffffff;
+  font-family: var(--brain-display);
+  box-shadow: 5px 5px 0 #0b1020;
+  transform: translateX(-50%);
+}
+
+.brain-hud-top,
+.brain-hud-main,
+.brain-hud-score {
+  display: flex;
+  align-items: center;
+}
+
+.brain-hud-top,
+.brain-hud-main {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brain-hud-main {
+  flex-wrap: wrap;
+}
+
+.brain-hud-guest,
+.brain-hud-label,
+.brain-hud-status {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.brain-hud-guest,
+.brain-hud-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.brain-hud-status {
+  overflow: hidden;
+  color: #ffffff;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brain-hud-score {
+  gap: 7px;
+  min-width: 130px;
+}
+
+.brain-hud-score strong {
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.brain-hud-delta {
+  color: #d9f99d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.brain-score-hud.is-wrong .brain-hud-delta,
+.brain-score-hud.is-wrong .brain-hud-status {
+  color: #ffd6e0;
+}
+
+.brain-score-hud.is-complete .brain-hud-status {
+  color: #d9f99d;
+}
+
+.brain-hud-percentile {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.brain-hud-profile-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 2px solid #0b1020;
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--brain-accent-strong);
+  font-family: var(--brain-display);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #0b1020;
+}
+
+.brain-hud-profile-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #0b1020;
+}
+
+.brain-hud-profile {
+  display: none;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 2px solid rgba(255, 255, 255, 0.32);
+}
+
+.brain-score-hud.is-profile-open .brain-hud-profile {
+  display: grid;
+}
+
+.brain-profile-title,
+.brain-profile-insight {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.brain-profile-title {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.brain-profile-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 34px;
+  gap: 8px;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11px;
+}
+
+.brain-profile-row strong {
+  overflow: hidden;
+  color: #d9f99d;
+  font-weight: 700;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.brain-profile-row em {
+  color: rgba(255, 255, 255, 0.68);
+  font-style: normal;
+  text-align: right;
+}
+
+.brain-profile-insight {
+  color: rgba(255, 255, 255, 0.76);
+}
+
 .openmind-stats,
 .openmind-summary-grid,
 .openmind-grid-3,
@@ -3795,19 +3956,66 @@ body {
   line-height: 0.9;
 }
 
-.quiz-q-stars .star {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
+  .quiz-q-stars .star {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
   height: 18px;
   font-family: "Noto Sans Thai", "Noto Sans", sans-serif;
   font-size: 22px;
-  line-height: 1;
-  letter-spacing: 0;
-}
+    line-height: 1;
+    letter-spacing: 0;
+  }
 
-html[data-openmind-lang="en"] {
+  .openmind-page:not(.openmind-is-landing) .openmind-shell {
+    padding-bottom: 96px;
+  }
+
+  .brain-score-hud {
+    bottom: 10px;
+    width: min(calc(100% - 20px), 410px);
+    padding: 9px 10px;
+    gap: 6px;
+    box-shadow: 4px 4px 0 #0b1020;
+  }
+
+  .brain-hud-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .brain-hud-main {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .brain-hud-score {
+    min-width: auto;
+  }
+
+  .brain-hud-profile-btn {
+    min-height: 30px;
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  .brain-hud-guest,
+  .brain-hud-status {
+    font-size: 10px;
+  }
+
+  .brain-hud-status {
+    max-width: 230px;
+  }
+
+  .brain-hud-percentile {
+    flex: 1 1 100%;
+    font-size: 11px;
+  }
+
+  html[data-openmind-lang="en"] {
   --brain-body: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --brain-display: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --brain-pixel: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
