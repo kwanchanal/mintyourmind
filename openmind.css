@@ -36,6 +36,10 @@ input {
   font: inherit;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .openmind-shell {
   min-height: 100vh;
   width: min(100%, 430px);
@@ -2801,10 +2805,36 @@ img.twemoji {
   padding: 12px 10px 24px;
 }
 
+.openmind-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
 .openmind-lang-toggle {
   display: flex;
   width: max-content;
-  margin: 0 0 12px auto;
+  margin: 0;
+}
+
+.openmind-home-btn {
+  min-width: 72px;
+  height: 46px;
+  padding: 0 14px;
+  border: 2px solid var(--brain-line-strong);
+  border-radius: 0;
+  background: #fff;
+  color: var(--brain-line-dark);
+  font-family: var(--brain-display);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.openmind-home-btn:hover {
+  background: #eef3ff;
 }
 
 .openmind-content-card {
@@ -2818,6 +2848,75 @@ img.twemoji {
 .openmind-hero {
   padding: 16px;
   border-radius: 8px;
+}
+
+.openmind-page.openmind-is-landing {
+  min-height: 100vh;
+}
+
+.openmind-is-landing .openmind-header {
+  justify-content: flex-end;
+}
+
+.openmind-is-landing .openmind-home-btn {
+  display: none;
+}
+
+.openmind-is-landing .openmind-shell {
+  display: grid;
+  align-content: start;
+  width: min(100%, 430px);
+  min-height: 100vh;
+  padding: 12px 10px 24px;
+}
+
+.openmind-is-landing .openmind-content {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.openmind-landing {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: calc(100vh - 82px);
+  padding: 14px;
+  border: 2px solid var(--brain-accent-strong);
+  border-radius: 8px;
+  background: var(--brain-accent);
+  box-shadow: var(--brain-shadow);
+}
+
+.openmind-go-btn {
+  min-width: 124px;
+  min-height: 54px;
+  padding: 0 28px;
+  border: 2px solid #ffffff;
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--brain-accent-strong);
+  font-family: var(--brain-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--brain-accent-strong);
+  transition:
+    transform 120ms steps(2, end),
+    background-color 120ms steps(2, end),
+    box-shadow 120ms steps(2, end);
+}
+
+.openmind-go-btn:hover {
+  transform: translate(-2px, -2px);
+  background: #f5fbff;
+  box-shadow: 6px 6px 0 #0f3674;
+}
+
+.openmind-go-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #0f3674;
 }
 
 .openmind-stats,
