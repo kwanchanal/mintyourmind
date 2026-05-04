@@ -3996,24 +3996,37 @@ body {
 
 .brain-profile-row {
   display: grid;
-  grid-template-columns: 72px 44px minmax(54px, auto);
-  gap: 8px;
+  grid-template-columns: 96px minmax(92px, 1fr) 44px;
+  gap: 12px;
   align-items: center;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
+  color: #ffffff;
+  font-size: 13px;
 }
 
-.brain-profile-row strong {
+.brain-profile-row > span {
+  min-width: 0;
+}
+
+.brain-profile-bar {
+  position: relative;
+  height: 12px;
   overflow: hidden;
-  color: #d9f99d;
-  font-weight: 700;
-  text-overflow: clip;
-  white-space: nowrap;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.5px, transparent 1.8px);
+  background-position: 0 0;
+  background-size: 5px 5px;
+}
+
+.brain-profile-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--score-fill);
+  background: #d9f99d;
 }
 
 .brain-profile-row em {
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(255, 255, 255, 0.72);
   font-style: normal;
+  font-weight: 700;
   text-align: right;
 }
 

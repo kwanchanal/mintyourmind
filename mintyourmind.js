@@ -60,7 +60,7 @@ function renderLanding() {
 
   document.body.classList.add("openmind-is-landing");
   content.innerHTML = `
-    <section class="openmind-landing" aria-label="Openmind landing">
+    <section class="openmind-landing" aria-label="mintyourmind landing">
       <div class="openmind-landing-copy">
         <p class="openmind-landing-kicker">80% get this wrong</p>
         <h1>Are you in the 20%?</h1>

@@ -29,6 +29,7 @@ const OPENMIND_DICTIONARY = {
       scoreStrongest: "จุดแข็งตอนนี้คือ {dimension}",
       scoreWeakest: "พื้นที่ฝึกต่อไปคือ {dimension}",
       scoreEmpty: "ตอบคำถามเพื่อเริ่มสร้าง Brain Score",
+      sessionScore: "Session Score",
       brainScore: "Brain Score",
       resetScore: "Reset",
       answered: "ตอบแล้ว",
@@ -84,6 +85,7 @@ const OPENMIND_DICTIONARY = {
       scoreStrongest: "Your strongest area is {dimension}.",
       scoreWeakest: "Your next training area is {dimension}.",
       scoreEmpty: "Answer questions to start building your Brain Score.",
+      sessionScore: "Session Score",
       brainScore: "Brain Score",
       resetScore: "Reset",
       answered: "Answered",
@@ -5763,6 +5765,7 @@ function createEmptyBrainScoreSession() {
     totalCorrect: 0,
     rawPoints: 0,
     maxPoints: 0,
+    totalPossible: 0,
     dimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 },
     maxDimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 }
   };
@@ -5787,6 +5790,7 @@ function calculateBrainScoreSession(sectionIndex = null) {
       session.totalCorrect += answerState.isCorrect ? 1 : 0;
       session.rawPoints += contribution.rawPoints;
       session.maxPoints += contribution.maxPoints;
+      session.totalPossible += contribution.maxPoints;
       BRAIN_DIMENSIONS.forEach((dimension) => {
         session.dimensions[dimension] += contribution.dimensions[dimension] || 0;
         session.maxDimensions[dimension] += contribution.maxDimensions[dimension] || 0;
@@ -5801,6 +5805,7 @@ function calculateBrainScoreSession(sectionIndex = null) {
   const activeDimensionScores = BRAIN_DIMENSIONS
     .filter((dimension) => session.maxDimensions[dimension] > 0)
     .map((dimension) => normalizedDimensions[dimension]);
+  const sessionScore = normalizeScore(session.rawPoints, session.totalPossible);
   const brainScore = activeDimensionScores.length
     ? Math.round(activeDimensionScores.reduce((sum, score) => sum + score, 0) / activeDimensionScores.length)
     : 0;
@@ -5808,6 +5813,7 @@ function calculateBrainScoreSession(sectionIndex = null) {
   return {
     ...session,
     normalizedDimensions,
+    sessionScore,
     brainScore
   };
 }
@@ -5829,6 +5835,16 @@ function getDimensionInsight(normalizedDimensions) {
   };
 }
 
+function getScoreReason(scoring, isCorrect) {
+  const key = isCorrect ? "correct" : "wrong";
+  const lang = getOpenmindLanguage();
+
+  return scoring.scoreReason?.[key] ||
+    scoring.scoreReason?.[lang]?.[key] ||
+    scoring.scoreReason?.en?.[key] ||
+    openmindTranslate("quiz.scoreFallbackReason");
+}
+
 function buildScoreFeedback(question, isCorrect) {
   const scoring = getQuestionScoring(question);
   const contribution = calculateQuestionContribution(question, isCorrect);
@@ -5839,9 +5855,7 @@ function buildScoreFeedback(question, isCorrect) {
       weight: scoring.dimensions[dimension] || 0
     }))
     .sort((a, b) => b.points - a.points || b.weight - a.weight)[0];
-  const reason = scoring.scoreReason?.[getOpenmindLanguage()]?.[isCorrect ? "correct" : "wrong"] ||
-    scoring.scoreReason?.en?.[isCorrect ? "correct" : "wrong"] ||
-    openmindTranslate("quiz.scoreFallbackReason");
+  const reason = getScoreReason(scoring, isCorrect);
 
   return {
     rawPoints: Math.round(contribution.rawPoints),
@@ -6488,11 +6502,14 @@ function renderBrainHud(state = {}) {
   const collapsedClass = isHudCollapsed ? " is-collapsed" : "";
   const dimensionRows = BRAIN_DIMENSIONS.map((dimension) => {
     const value = session.normalizedDimensions[dimension] || 0;
+    const displayValue = (value / 10).toFixed(1);
     return `
       <div class="brain-profile-row">
         <span>${getDimensionLabel(dimension)}</span>
-        <strong>${value}</strong>
-        <em>${session.maxDimensions[dimension] ? "active" : "pending"}</em>
+        <div class="brain-profile-bar" aria-hidden="true">
+          <span style="--score-fill:${value}%;"></span>
+        </div>
+        <em>${displayValue}</em>
       </div>
     `;
   }).join("");
@@ -6513,7 +6530,6 @@ function renderBrainHud(state = {}) {
       <p class="brain-hud-percentile">${openmindTranslate("quiz.answered")}: ${session.totalAnswered} · ${openmindTranslate("quiz.correct")}: ${session.totalCorrect} · ${accuracy}%</p>
     </div>
     <div class="brain-hud-profile" id="brainHudProfile">
-      <p class="brain-profile-title">${openmindTranslate("quiz.brainScore")}: ${score}</p>
       ${dimensionRows}
       <p class="brain-profile-insight">${message}</p>
       <button type="button" class="brain-hud-profile-btn" data-score-reset>${openmindTranslate("quiz.resetScore")}</button>

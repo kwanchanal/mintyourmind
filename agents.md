@@ -1,122 +1,513 @@
-# openmind Feature Summary
+# 🧠 mintyourmind — Product Specification
 
-เอกสารนี้สรุปฟีเจอร์หลักของโปรเจกต์ `openmind` สำหรับคนหรือ agent ที่เข้ามาดูแลต่อ
+## 1. Overview
 
-## ภาพรวม
+**mintyourmind** is a cognitive training product designed for people of all ages who want to improve their thinking, decision-making, and problem-solving skills through structured puzzles.
 
-`openmind` เป็นเว็บ quiz หน้าเดียวสำหรับฝึกคิดเชิงตรรกะและโจทย์สมอง ใช้ HTML, CSS และ JavaScript แบบ static site ไม่มี build step หรือ dependency ฝั่ง server
+mintyourmind is designed to be globally accessible, using universal logic and real-world reasoning patterns that do not rely on language complexity or cultural context.
 
-ไฟล์หลัก:
+Unlike traditional puzzle games, mintyourmind focuses on:
 
-- `index.html` เป็น entry point ของหน้าเว็บ โหลดฟอนต์, stylesheet, Twemoji, `quiz.js` และ `openmind.js`
-- `quiz.js` เก็บข้อมูลโจทย์ทั้งหมด ระบบภาษา state ของเกม และ logic การ render quiz
-- `openmind.js` ดูแลปุ่มสลับภาษาและเริ่มต้น quiz
-- `openmind.css` ดูแล layout, component, responsive style และ visual state ของคำตอบ
-- `favicon/logo.png` เป็น favicon ของเว็บ
+* Logical reasoning
+* Pattern recognition
+* Cognitive bias awareness
+* Real-world thinking traps
 
-## ฟีเจอร์ที่มี
+The goal is not just to entertain, but to **train how people think**.
 
-### Quiz Chapters
+---
 
-- มีทั้งหมด 6 บท รวม 66 ข้อ
-- บทที่มีอยู่:
-  - บททดลอง / Warm-Up
-  - บทที่ 1 / Chapter 1
-  - บทที่ 2 / Chapter 2
-  - บทที่ 3 / Chapter 3
-  - บทที่ 4 / Chapter 4
-  - บทที่ 5 / Chapter 5
-- แต่ละบทมี title, description และรายการคำถามของตัวเอง
-- ผู้ใช้สามารถสลับบทได้จาก chapter switcher ด้านบน
-- chip ของแต่ละบทแสดงจำนวนข้อที่ทำแล้วเทียบกับจำนวนข้อทั้งหมดของบทนั้น
+## 2. Product Vision
 
-### Question Navigation
+> Train your mind like a strategist.
 
-- แต่ละบทมี jump navigation เป็นปุ่มเลขข้อ
-- ปุ่มข้อปัจจุบันมีสถานะ `is-current`
-- ข้อที่เคยตรวจคำตอบแล้วมีสถานะ `is-completed`
-- ผู้ใช้ย้อนกลับไปข้อก่อนหน้า หรือข้ามไปข้อใดก็ได้ในบท
-- เมื่อเปลี่ยนข้อหรือเปลี่ยนบท หน้าเลื่อนกลับขึ้นด้านบนแบบ smooth scroll
+mintyourmind aims to become a global standard for mental fitness — focusing on real-world reasoning, decision-making, and cognitive clarity.
 
-### Answer Flow
+---
 
-- คำถามรองรับ multiple choice ผ่าน `QUESTION_CHOICES`
-- ปุ่มตรวจคำตอบจะ disabled จนกว่าจะเลือกตัวเลือก
-- เมื่อตรวจคำตอบแล้ว:
-  - ตัวเลือกที่ถูกจะแสดงสถานะ `is-correct`
-  - ตัวเลือกที่เลือกผิดจะแสดงสถานะ `is-wrong`
-  - แสดง feedback ว่าถูกหรือยังไม่ถูก
-  - แสดงคำตอบที่ถูก
-  - แสดงเฉลยและวิธีคิด
-- บางคำถามรองรับโหมดเปิดเฉลยโดยไม่มีตัวเลือก ถ้าไม่มี `choices`
+## 3. Target Users
 
-### Explanations and Diagrams
+* People who enjoy logic puzzles and brain training
+* Users interested in self-improvement and mental performance
+* Knowledge workers seeking sharper thinking and better decisions
 
-- คำถามสามารถมี diagram แบบ inline SVG ผ่าน field `diagram`
-- เฉลยสามารถมี diagram คำตอบผ่าน field `answerDiagram`
-- ระบบแปลง emoji ใน SVG ให้ใช้ Twemoji SVG เพื่อให้ภาพนิ่งและสม่ำเสมอข้าม platform
-- มี helper `pixelizeDiagramMarkup()` เพื่อปรับ SVG ให้คมและเข้ากับสไตล์ pixel/quiz มากขึ้น
-- เฉลยหลายข้อใช้ `.explain-step` เพื่อแบ่งวิธีคิดเป็นขั้นตอน
-- รองรับตารางในเฉลยผ่าน `.explain-table`
+---
 
-### Language Support
+## 4. Core Value Proposition
 
-- รองรับภาษาไทยและอังกฤษ
-- ค่าเริ่มต้นเป็นภาษาไทย
-- ภาษาที่เลือกถูกบันทึกใน `localStorage` ด้วย key `openmind-language`
-- ปุ่มสลับภาษาอยู่ด้านบนของ quiz และใช้ `aria-pressed`
-- `window.openmindI18n` เป็น interface หลักสำหรับ:
-  - อ่านภาษาปัจจุบัน
-  - เปลี่ยนภาษา
-  - translate UI text
-  - subscribe ตอนภาษาเปลี่ยน
-  - localize value ที่มีรูปแบบ `{ th, en }`
-- ข้อมูลแปลโจทย์และเฉลยอยู่ใน `QUESTION_TRANSLATIONS`, `QUESTION_EXPLANATION_OVERRIDES` และ `ADDITIONAL_EXPLANATION_OVERRIDES`
+* Short, high-quality puzzles (3–5 minutes)
+* Immediate feedback with explanation
+* Identification of thinking patterns and weaknesses
+* Progressive improvement over time
+* Real-world reasoning training (not abstract drills)
 
-### Completion Flow
+---
 
-- เมื่อจบบท ระบบแสดงหน้าสรุปว่าจบบทแล้ว
-- ถ้ายังมีบทถัดไป จะมีปุ่มไปบทถัดไป
-- มีปุ่ม replay เพื่อกลับไปเล่นข้อใดก็ได้ในบทที่จบแล้ว
-- มีปุ่มเล่นใหม่อีกครั้งสำหรับ reset state ของบทปัจจุบัน
-- ถ้าจบบทสุดท้าย จะแสดงข้อความครบทุกบทแล้ว
+## 5. Core User Flow
 
-### UI and Styling
+1. User selects a puzzle (Warm-up or Chapter)
 
-- Layout หลักถูกออกแบบเป็น mobile-first โดย shell กว้างสูงสุดประมาณ 430px
-- ใช้ card, chip, pill button และ jump button เป็น component หลัก
-- มี visual state สำหรับ:
-  - active language
-  - current chapter
-  - started chapter
-  - current question
-  - completed question
-  - selected answer
-  - correct answer
-  - wrong answer
-- ใช้ Google Fonts หลายชุด รวมถึง `Noto Sans Thai`
-- โหลด Twemoji จาก CDN เพื่อ normalize emoji rendering
+2. User answers multiple-choice question
 
-## State ที่สำคัญ
+3. System evaluates answer
 
-`quizState` ใน `quiz.js` เก็บ state runtime:
+4. User receives:
 
-- `currentSection` index ของบทปัจจุบัน
-- `currentQuestion` index ของข้อปัจจุบัน
-- `answeredBySection` คำตอบและสถานะที่ทำแล้ว แยกตามบท
-- `revealed` บอกว่าเฉลยของข้อปัจจุบันถูกเปิดแล้วหรือยัง
+   * Correct / Incorrect feedback
+   * Explanation of reasoning
+   * Identification of thinking trap
 
-state คำตอบต่อข้อเก็บข้อมูลเช่น:
+5. Score is updated
 
-- `selectedChoice`
-- `checked`
-- `isCorrect`
-- `completedOnce`
+6. Progress is tracked
 
-## จุดที่ควรรู้ก่อนแก้ไขต่อ
+7. User continues to next puzzle
 
-- ข้อมูลโจทย์จำนวนมากอยู่ในไฟล์เดียวคือ `quiz.js`; ควรแก้แบบระวัง scope
-- ถ้าเพิ่มคำถามแบบ multiple choice ต้องเพิ่มข้อมูลใน `QUIZ_SECTIONS` และเพิ่มตัวเลือกใน `QUESTION_CHOICES`
-- ถ้าต้องการรองรับอังกฤษครบ ต้องเพิ่ม translation/override ให้ question id ที่เกี่ยวข้อง
-- ถ้าเพิ่ม emoji ใน SVG diagram ระบบพยายามแปลงเป็น Twemoji ผ่าน `replaceSvgEmojiWithTwemoji()`
-- โปรเจกต์นี้เป็น static site จึงเปิด `index.html` ได้โดยตรงใน browser
+Each interaction reinforces learning through immediate feedback, pattern recognition, and repeated exposure to common thinking traps.
+
+---
+
+## 6. Core Features
+
+### 6.1 Puzzle System
+
+* Multiple-choice questions
+* Structured into:
+
+  * Warm-Up (daily / quick entry)
+  * Chapters (progressive difficulty)
+
+---
+
+### 6.2 Answer Feedback (Critical Feature)
+
+After each answer, the system must display:
+
+* Result: Correct / Incorrect
+
+* Explanation:
+
+  * Step-by-step reasoning
+  * Why the correct answer is correct
+
+* Thinking Trap:
+
+  * Example tags:
+
+    * Assumption trap
+    * Framing effect
+    * Pattern misinterpretation
+    * Over-simplification
+
+---
+
+### 6.3 Progress System
+
+* Track:
+
+  * Questions completed per chapter
+  * Overall completion %
+
+* Optional (MVP+):
+
+  * XP / Level system
+
+---
+
+### 6.4 Brain Score (Percentile-Based)
+
+Track core thinking dimensions:
+
+* Logic
+* Pattern recognition
+* Attention to detail
+* Bias resistance
+
+Scores are normalized across users and displayed as percentiles.
+
+Example outputs:
+
+* “You are stronger in logic than 72% of users”
+* “You’re in the top 18% of logical thinkers”
+
+Purpose:
+Provide users with a relative understanding of their thinking performance, not just absolute scores.
+
+---
+
+### 6.5 Brain Profile (MVP+)
+
+After enough puzzles (e.g. 10–20):
+
+Generate a structured profile:
+
+* Logic: 8/10
+* Pattern recognition: 6/10
+* Attention to detail: 5/10
+* Bias resistance: 4/10
+
+Output includes:
+
+1. Strength summary
+2. Weakness identification
+3. Behavioral insight
+
+Example:
+
+> “You are strong in structured logic, but tend to miss subtle details and are vulnerable to assumption-based errors.”
+
+Purpose:
+Help users understand how they think — not just how well they perform.
+
+---
+
+### 6.6 Daily Habit Loop (MVP+)
+
+* Daily puzzle (1–3 questions)
+* Streak tracking
+
+Goal:
+Encourage consistent usage
+
+---
+
+## 7. Content Design Principles
+
+Each puzzle should:
+
+* Be solvable within 1–3 minutes
+* Contain a clear “thinking trap”
+* Avoid trivial math-only problems
+* Reflect real-world reasoning patterns
+
+---
+
+## 8. UX Principles
+
+* Clean and minimal interface
+* Focus on clarity over decoration
+* Immediate feedback after action
+* Subtle emotional reinforcement:
+
+  * Correct → positive feedback
+  * Incorrect → constructive insight
+
+---
+
+## 9. Differentiation
+
+Compared to existing apps (e.g. Lumosity, Elevate):
+
+mintyourmind focuses on:
+
+* Thinking quality, not speed
+* Real-world reasoning, not abstract drills
+* Explanation-driven learning, not repetition
+* Emphasis on real-world decision-making over game mechanics
+
+---
+
+## 10. Monetization (Future)
+
+### Free Tier:
+
+* Warm-up puzzles
+* Chapter 1
+
+### Paid Tier:
+
+* Full access to all chapters
+* Advanced brain profile
+* Additional puzzle packs
+
+---
+
+## 11. MVP Scope (Initial Release)
+
+Include:
+
+* Puzzle system (Warm-up + Chapters)
+* Answer feedback + explanation
+* Basic progress tracking
+
+Exclude (for now):
+
+* Advanced analytics
+* Complex scoring systems
+* Social features
+
+---
+
+## 12. Success Metrics
+
+* Completion rate per puzzle
+* Daily return rate
+* Average session length
+* % of users completing a full chapter
+
+---
+
+## 13. Future Opportunities
+
+* Personalized puzzle recommendations
+* Advanced cognitive analytics
+* Shareable brain profile
+* Mobile app version
+
+---
+
+## 14. Summary
+
+mintyourmind transforms puzzles into a structured system for improving thinking.
+
+It is not just a game — it is a **global mental training product for real-world reasoning**.
+# 🧠 mintyourmind — Product Specification (MVP)
+
+## 1. Overview
+
+**mintyourmind** is a cognitive training product designed for people who want to improve their thinking, decision-making, and problem-solving skills through structured puzzles.
+
+mintyourmind is built to be globally accessible, using universal logic and real-world reasoning patterns that do not rely on language complexity or cultural context.
+
+Unlike traditional puzzle games, mintyourmind focuses on:
+
+* Logical reasoning
+* Pattern recognition
+* Cognitive bias awareness
+* Real-world thinking traps
+
+The goal is not just to entertain, but to **measure and improve how people think**.
+
+---
+
+## 2. Product Vision
+
+> Train your mind like a strategist.
+
+mintyourmind aims to become a global standard for mental fitness — focusing on real-world reasoning, decision-making, and cognitive clarity.
+
+---
+
+## 3. Target Users
+
+* People who enjoy logic puzzles and brain training
+* Users interested in self-improvement and mental performance
+* Knowledge workers seeking sharper thinking and better decisions
+
+---
+
+## 4. Core Value Proposition
+
+* Short, high-quality puzzles (3–5 minutes)
+* Benchmark your thinking against others
+* Clear percentile-based performance insights
+* Identification of thinking patterns and weaknesses
+* Progressive improvement over time
+* Real-world reasoning training (not abstract drills)
+
+---
+
+## 5. Core User Flow
+
+1. User selects a puzzle set (Warm-up or Chapter)
+2. User answers multiple-choice questions
+3. System records responses across multiple puzzles
+4. System evaluates overall performance
+5. User receives:
+
+   * Percentile-based Brain Score
+   * Performance breakdown by thinking dimensions
+   * Identified strengths and weaknesses
+
+6. User continues training or explores next set
+
+Learning is driven by aggregated performance insights rather than per-question correction.
+
+---
+
+## 6. Core Features
+
+### 6.1 Puzzle System
+
+* Multiple-choice questions
+* Structured into:
+
+  * Warm-Up (daily / quick entry)
+  * Chapters (progressive difficulty)
+
+---
+
+### 6.2 Answer Feedback (Secondary Feature)
+
+After answering, the system may display:
+
+* Correct / Incorrect result
+* Explanation of reasoning
+* Thinking Trap classification
+
+Note:
+Immediate feedback is not the primary learning mechanism.
+The system prioritizes aggregated performance insights over per-question correction.
+
+---
+
+### 6.3 Progress System
+
+* Track:
+
+  * Questions completed per chapter
+  * Overall completion %
+
+* Optional (MVP+):
+
+  * XP / Level system
+
+---
+
+### 6.4 Brain Score (Core Feature)
+
+Track core thinking dimensions:
+
+* Logic
+* Pattern recognition
+* Attention to detail
+* Bias resistance
+
+Scores are normalized across users and displayed as percentiles.
+
+Example outputs:
+
+* “You are stronger in logic than 72% of users”
+* “You’re in the top 18% of logical thinkers”
+
+Purpose:
+Position the user relative to a global population, creating a clear sense of ranking and performance.
+
+---
+
+### 6.5 Brain Profile (Core Feature)
+
+After sufficient activity (e.g. 10–20 puzzles), generate a structured thinking profile:
+
+Dimensions:
+
+* Logic: 8/10
+* Pattern recognition: 6/10
+* Attention to detail: 5/10
+* Bias resistance: 4/10
+
+Output includes:
+
+1. Strength summary
+2. Weakness identification
+3. Behavioral insight
+
+Example:
+
+> “You are strong in structured logic and rank above most users, but tend to miss subtle details and are more vulnerable to assumption-based errors.”
+
+Purpose:
+Provide users with a clear understanding of how they think and where they stand globally.
+
+---
+
+### 6.6 Daily Habit Loop (MVP+)
+
+* Daily puzzle (1–3 questions)
+* Streak tracking
+
+Goal:
+Encourage consistent usage
+
+---
+
+## 7. Content Design Principles
+
+Each puzzle should:
+
+* Be solvable within 1–3 minutes
+* Contain a clear “thinking trap”
+* Avoid trivial math-only problems
+* Reflect real-world reasoning patterns
+
+---
+
+## 8. UX Principles
+
+* Clean and minimal interface
+* Focus on clarity over decoration
+* Emphasize clarity of results over interaction complexity
+* Prioritize insight and interpretation over instant feedback
+
+---
+
+## 9. Differentiation
+
+Compared to existing apps (e.g. Lumosity, Elevate):
+
+mintyourmind focuses on:
+
+* Thinking quality, not speed
+* Real-world reasoning, not abstract drills
+* Percentile-based benchmarking, not raw scoring
+* Explanation-driven insight, not repetitive training
+* Emphasis on real-world decision-making over game mechanics
+
+---
+
+## 10. Monetization (Future)
+
+### Free Tier:
+
+* Warm-up puzzles
+* Chapter 1
+
+### Paid Tier:
+
+* Full access to all chapters
+* Advanced brain profile
+* Deeper performance insights
+* Additional puzzle packs
+
+---
+
+## 11. MVP Scope (Initial Release)
+
+Include:
+
+* Puzzle system (Warm-up + Chapters)
+* Basic progress tracking
+* Brain Score (percentile-based)
+
+Exclude (for now):
+
+* Advanced analytics
+* Complex scoring systems
+* Social features
+
+---
+
+## 12. Success Metrics
+
+* Completion rate per puzzle set
+* Daily return rate
+* Average session length
+* % of users reaching Brain Score result
+* % of users completing a full chapter
+
+---
+
+## 13. Future Opportunities
+
+* Personalized puzzle recommendations
+* Advanced cognitive analytics
+* Shareable brain profile
+* Mobile app version
+
+---
+
+## 14. Summary
+
+mintyourmind transforms puzzles into a structured system for understanding and improving thinking.
+
+It is not just a game — it is a **global mental benchmarking and training product for real-world reasoning**.
