@@ -3437,7 +3437,7 @@ body {
 }
 
 .openmind-page:not(.openmind-is-landing) .openmind-shell {
-  padding-bottom: 140px;
+  padding-bottom: 132px;
 }
 
 .openmind-is-landing .openmind-home-btn {
@@ -3848,7 +3848,7 @@ body {
 .brain-score-hud {
   position: fixed;
   left: 50%;
-  bottom: 14px;
+  bottom: 8px;
   z-index: 30;
   display: grid;
   gap: 8px;
@@ -4037,18 +4037,26 @@ body {
   position: relative;
   height: 13px;
   overflow: hidden;
-  background-color: transparent;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.55px, transparent 1.8px);
-  background-position: 1.5px 1.5px;
-  background-size: 5px 5px;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.18) 0px,
+    rgba(255, 255, 255, 0.18) 10px,
+    transparent 10px,
+    transparent 12px
+  );
 }
 
 .brain-profile-bar span {
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--score-fill);
-  background: #d9f99d;
-  box-shadow: 2px 0 0 rgba(11, 16, 32, 0.28);
+  background-image: repeating-linear-gradient(
+    to right,
+    #d9f99d 0px,
+    #d9f99d 10px,
+    transparent 10px,
+    transparent 12px
+  );
 }
 
 .brain-profile-row em {
@@ -4149,11 +4157,11 @@ body {
   }
 
   .openmind-page:not(.openmind-is-landing) .openmind-shell {
-    padding-bottom: 130px;
+    padding-bottom: 124px;
   }
 
   .brain-score-hud {
-    bottom: 10px;
+    bottom: 6px;
     width: min(calc(100% - 20px), 410px);
     padding: 9px 10px;
     gap: 6px;
@@ -4223,6 +4231,7 @@ html[data-openmind-lang="en"] input {
 
 .quiz-section-chip {
   flex: 0 0 auto;
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: baseline;
@@ -4232,7 +4241,7 @@ html[data-openmind-lang="en"] input {
   border: 0;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  margin-bottom: -2px;
+  margin-bottom: 0;
   background: transparent;
   color: var(--brain-muted);
   white-space: nowrap;
@@ -4272,4 +4281,5 @@ html[data-openmind-lang="en"] input {
   border-bottom-color: var(--brain-accent-strong);
   background: transparent;
   color: var(--brain-accent-strong);
+  box-shadow: inset 0 -4px 0 var(--brain-accent-strong);
 }

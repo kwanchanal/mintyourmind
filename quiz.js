@@ -5661,6 +5661,7 @@ const quizState = {
 // DOM references
 let questionEl, progressEl, progressTextEl, revealBtn, nextBtn, prevBtn, sectionHeaderEl, brainHudEl;
 let isHudCollapsed = false;
+let hasHudScrollListener = false;
 
 const BRAIN_DIMENSIONS = ["logic", "pattern", "attention", "bias"];
 const DEFAULT_SCORING = {
@@ -6473,6 +6474,30 @@ function buildQuestionPixelScene(question, questionNumber) {
   `;
 }
 
+function collapseBrainHud() {
+  if (!brainHudEl || isHudCollapsed) return;
+
+  isHudCollapsed = true;
+  brainHudEl.classList.add("is-collapsed");
+  const button = brainHudEl.querySelector("[data-hud-collapse]");
+  if (button) button.textContent = "▲";
+}
+
+function ensureHudScrollCollapse() {
+  if (hasHudScrollListener) return;
+
+  hasHudScrollListener = true;
+  let lastScrollY = window.scrollY;
+
+  window.addEventListener("scroll", () => {
+    const moved = Math.abs(window.scrollY - lastScrollY);
+    if (moved > 8 && !document.body.classList.contains("openmind-is-landing")) {
+      collapseBrainHud();
+    }
+    lastScrollY = window.scrollY;
+  }, { passive: true });
+}
+
 function initQuiz() {
   const content = document.getElementById("openmindContent");
   content.innerHTML = `
@@ -6505,16 +6530,7 @@ function initQuiz() {
   nextBtn.addEventListener("click", nextQuestion);
   prevBtn.addEventListener("click", prevQuestion);
 
-  let lastScrollY = window.scrollY;
-  window.addEventListener("scroll", () => {
-    if (!isHudCollapsed && Math.abs(window.scrollY - lastScrollY) > 8) {
-      isHudCollapsed = true;
-      brainHudEl.classList.add("is-collapsed");
-      const btn = brainHudEl.querySelector("[data-hud-collapse]");
-      if (btn) btn.textContent = "▲";
-    }
-    lastScrollY = window.scrollY;
-  }, { passive: true });
+  ensureHudScrollCollapse();
 
   renderBrainHud();
   renderQuestion();
