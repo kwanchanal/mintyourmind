@@ -5685,6 +5685,8 @@ const DEFAULT_SCORING = {
   }
 };
 
+let brainScoreSession = createEmptyBrainScoreSession();
+
 function getQuestionState() {
   return getCurrentAnswers()[quizState.currentQuestion] || null;
 }
@@ -5767,15 +5769,63 @@ function createEmptyBrainScoreSession() {
     maxPoints: 0,
     totalPossible: 0,
     dimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 },
-    maxDimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 }
+    maxDimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 },
+    answeredQuestionIds: new Set()
   };
 }
 
+function getScoreQuestionId(question) {
+  return String(question?.id ?? "");
+}
+
+function addQuestionToScoreSession(session, question, isCorrect) {
+  const questionId = getScoreQuestionId(question);
+  if (!questionId || session.answeredQuestionIds.has(questionId)) {
+    return null;
+  }
+
+  const contribution = calculateQuestionContribution(question, isCorrect);
+  session.answeredQuestionIds.add(questionId);
+  session.totalAnswered += 1;
+  session.totalCorrect += isCorrect ? 1 : 0;
+  session.rawPoints += contribution.rawPoints;
+  session.maxPoints += contribution.maxPoints;
+  session.totalPossible += contribution.maxPoints;
+  BRAIN_DIMENSIONS.forEach((dimension) => {
+    session.dimensions[dimension] += contribution.dimensions[dimension] || 0;
+    session.maxDimensions[dimension] += contribution.maxDimensions[dimension] || 0;
+  });
+
+  return contribution;
+}
+
+function getBrainScoreSnapshot(session) {
+  const normalizedDimensions = BRAIN_DIMENSIONS.reduce((result, dimension) => {
+    result[dimension] = normalizeScore(session.dimensions[dimension], session.maxPoints);
+    return result;
+  }, {});
+  const sessionScore = normalizeScore(session.rawPoints, session.maxPoints);
+
+  return {
+    ...session,
+    normalizedDimensions,
+    sessionScore,
+    brainScore: sessionScore
+  };
+}
+
+function updateBrainScoreSession(question, isCorrect) {
+  addQuestionToScoreSession(brainScoreSession, question, isCorrect);
+  return getBrainScoreSnapshot(brainScoreSession);
+}
+
 function calculateBrainScoreSession(sectionIndex = null) {
+  if (sectionIndex === null) {
+    return getBrainScoreSnapshot(brainScoreSession);
+  }
+
   const session = createEmptyBrainScoreSession();
-  const sections = sectionIndex === null
-    ? QUIZ_SECTIONS.map((section, index) => ({ section, index }))
-    : [{ section: QUIZ_SECTIONS[sectionIndex], index: sectionIndex }];
+  const sections = [{ section: QUIZ_SECTIONS[sectionIndex], index: sectionIndex }];
 
   sections.forEach(({ section, index }) => {
     if (!section) return;
@@ -5784,38 +5834,11 @@ function calculateBrainScoreSession(sectionIndex = null) {
       if (!answerState?.checked || answerState.scoreVersion !== quizState.scoreVersion) return;
       const question = section.questions[questionIndex];
       if (!question) return;
-      const contribution = calculateQuestionContribution(question, Boolean(answerState.isCorrect));
-
-      session.totalAnswered += 1;
-      session.totalCorrect += answerState.isCorrect ? 1 : 0;
-      session.rawPoints += contribution.rawPoints;
-      session.maxPoints += contribution.maxPoints;
-      session.totalPossible += contribution.maxPoints;
-      BRAIN_DIMENSIONS.forEach((dimension) => {
-        session.dimensions[dimension] += contribution.dimensions[dimension] || 0;
-        session.maxDimensions[dimension] += contribution.maxDimensions[dimension] || 0;
-      });
+      addQuestionToScoreSession(session, question, Boolean(answerState.isCorrect));
     });
   });
 
-  const normalizedDimensions = BRAIN_DIMENSIONS.reduce((result, dimension) => {
-    result[dimension] = normalizeScore(session.dimensions[dimension], session.maxDimensions[dimension]);
-    return result;
-  }, {});
-  const activeDimensionScores = BRAIN_DIMENSIONS
-    .filter((dimension) => session.maxDimensions[dimension] > 0)
-    .map((dimension) => normalizedDimensions[dimension]);
-  const sessionScore = normalizeScore(session.rawPoints, session.totalPossible);
-  const brainScore = activeDimensionScores.length
-    ? Math.round(activeDimensionScores.reduce((sum, score) => sum + score, 0) / activeDimensionScores.length)
-    : 0;
-
-  return {
-    ...session,
-    normalizedDimensions,
-    sessionScore,
-    brainScore
-  };
+  return getBrainScoreSnapshot(session);
 }
 
 function getScoreMessage(brainScore) {
@@ -6517,9 +6540,11 @@ function renderBrainHud(state = {}) {
   brainHudEl.className = `brain-score-hud is-${status} is-profile-open${collapsedClass}`;
   brainHudEl.innerHTML = `
     <div class="brain-hud-top">
-      <span class="brain-hud-guest">Hi, Guest</span>
-      <span class="brain-hud-status">${message}</span>
-      <button type="button" class="brain-hud-collapse-btn" data-hud-collapse aria-label="Toggle HUD">${isHudCollapsed ? "▲" : "▼"}</button>
+      <div class="brain-hud-user">
+        <span class="brain-hud-welcome">Welcome,</span>
+        <button type="button" class="brain-hud-signin-btn">[ Guest ]</button>
+        <button type="button" class="brain-hud-collapse-btn" data-hud-collapse aria-label="Toggle HUD">${isHudCollapsed ? "▲" : "▼"}</button>
+      </div>
     </div>
     <div class="brain-hud-main">
       <div class="brain-hud-score">
@@ -6532,7 +6557,10 @@ function renderBrainHud(state = {}) {
     <div class="brain-hud-profile" id="brainHudProfile">
       ${dimensionRows}
       <p class="brain-profile-insight">${message}</p>
-      <button type="button" class="brain-hud-profile-btn" data-score-reset>${openmindTranslate("quiz.resetScore")}</button>
+      <div class="brain-profile-actions">
+        <button type="button" class="brain-hud-profile-btn" data-score-reset>${openmindTranslate("quiz.resetScore")}</button>
+        <button type="button" class="brain-hud-profile-btn">Sign in to save your progress</button>
+      </div>
     </div>
   `;
 
@@ -6546,6 +6574,7 @@ function renderBrainHud(state = {}) {
 
 function resetBrainScore() {
   quizState.scoreVersion += 1;
+  brainScoreSession = createEmptyBrainScoreSession();
   renderBrainHud({
     status: "idle",
     score: 0,
@@ -6762,15 +6791,8 @@ function renderJumpNav(totalQ) {
 }
 
 function jumpToQuestion(index) {
-  const currentAnswers = getCurrentAnswers();
-  const currentState = currentAnswers[index];
   quizState.currentQuestion = index;
 
-  if (currentState?.checked) {
-    currentAnswers[index] = {
-      completedOnce: true
-    };
-  }
 
   renderQuestion();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -6795,6 +6817,7 @@ function revealAnswer() {
     scoreFeedback
   });
   quizState.revealed = true;
+  updateBrainScoreSession(q, isCorrect);
 
   updateBrainHudAfterAnswer(isCorrect, scoreFeedback);
   renderQuestion();

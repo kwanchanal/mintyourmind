@@ -3876,11 +3876,30 @@ body {
   gap: 12px;
 }
 
+.brain-hud-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.brain-hud-signin-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-family: var(--brain-display);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .brain-hud-main {
   flex-wrap: wrap;
 }
 
 .brain-hud-guest,
+.brain-hud-welcome,
 .brain-hud-label,
 .brain-hud-status {
   font-size: 11px;
@@ -3888,6 +3907,7 @@ body {
 }
 
 .brain-hud-guest,
+.brain-hud-welcome,
 .brain-hud-label {
   color: rgba(255, 255, 255, 0.72);
 }
@@ -3952,6 +3972,12 @@ body {
   display: none;
 }
 
+.brain-profile-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr);
+  gap: 10px;
+}
+
 .brain-hud-profile-btn {
   min-height: 34px;
   padding: 0 12px;
@@ -4009,10 +4035,11 @@ body {
 
 .brain-profile-bar {
   position: relative;
-  height: 12px;
+  height: 13px;
   overflow: hidden;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.5px, transparent 1.8px);
-  background-position: 0 0;
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.9) 1.55px, transparent 1.8px);
+  background-position: 1.5px 1.5px;
   background-size: 5px 5px;
 }
 
@@ -4021,6 +4048,7 @@ body {
   inset: 0 auto 0 0;
   width: var(--score-fill);
   background: #d9f99d;
+  box-shadow: 2px 0 0 rgba(11, 16, 32, 0.28);
 }
 
 .brain-profile-row em {
