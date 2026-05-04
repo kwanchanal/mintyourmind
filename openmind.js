@@ -64,7 +64,6 @@ function renderLanding() {
       <div class="openmind-landing-copy">
         <p class="openmind-landing-kicker">80% get this wrong</p>
         <h1>Are you in the 20%?</h1>
-        <p>Your mind deserves training too.</p>
       </div>
 
       <div class="home-prediction" aria-label="Micro prediction puzzle">
@@ -99,6 +98,7 @@ function renderLanding() {
       </div>
 
       <button type="button" class="openmind-go-btn" id="openmindGoBtn">GO</button>
+      <p class="openmind-go-copy">Your mind deserves training too.</p>
     </section>
   `;
 

@@ -21,6 +21,24 @@ const OPENMIND_DICTIONARY = {
       feedbackWrong: "ยังไม่ถูก",
       feedbackCorrectCopy: "คุณจับ logic ของโจทย์ข้อนี้ได้ถูกทางแล้ว",
       feedbackWrongCopy: "ลองเทียบตัวเลือกที่เลือกกับ constraint ในโจทย์ แล้วดูเฉลยด้านล่างต่อ",
+      scoreNoPoints: "ยังไม่มีคะแนนเพิ่ม",
+      scoreFallbackReason: "ข้อนี้ใช้คะแนนตรรกะพื้นฐาน",
+      scoreStrong: "ผลงานการคิดแข็งแรงมาก",
+      scoreGood: "ได้ฝึกสมองดีมาก",
+      scoreKeepTraining: "ฝึกต่ออีกนิด คะแนนจะเริ่มชัดขึ้น",
+      scoreStrongest: "จุดแข็งตอนนี้คือ {dimension}",
+      scoreWeakest: "พื้นที่ฝึกต่อไปคือ {dimension}",
+      scoreEmpty: "ตอบคำถามเพื่อเริ่มสร้าง Brain Score",
+      brainScore: "Brain Score",
+      resetScore: "Reset",
+      answered: "ตอบแล้ว",
+      correct: "ถูก",
+      dimensions: {
+        logic: "Logic",
+        pattern: "Pattern",
+        attention: "Attention",
+        bias: "Bias"
+      },
       yourAnswer: "คุณตอบ",
       correctAnswer: "คำตอบที่ถูก",
       answerLabel: "✅ เฉลย",
@@ -58,6 +76,24 @@ const OPENMIND_DICTIONARY = {
       feedbackWrong: "Not quite",
       feedbackCorrectCopy: "You followed the logic in the right direction.",
       feedbackWrongCopy: "Compare your choice with the puzzle constraints, then review the solution below.",
+      scoreNoPoints: "No score added",
+      scoreFallbackReason: "This puzzle uses baseline logic scoring.",
+      scoreStrong: "Strong thinking performance.",
+      scoreGood: "Good cognitive workout.",
+      scoreKeepTraining: "Keep training your thinking.",
+      scoreStrongest: "Your strongest area is {dimension}.",
+      scoreWeakest: "Your next training area is {dimension}.",
+      scoreEmpty: "Answer questions to start building your Brain Score.",
+      brainScore: "Brain Score",
+      resetScore: "Reset",
+      answered: "Answered",
+      correct: "Correct",
+      dimensions: {
+        logic: "Logic",
+        pattern: "Pattern",
+        attention: "Attention",
+        bias: "Bias"
+      },
       yourAnswer: "Your answer",
       correctAnswer: "Correct answer",
       answerLabel: "✅ Answer",
@@ -5323,6 +5359,249 @@ const ADDITIONAL_EXPLANATION_OVERRIDES = {
   }
 };
 
+const QUESTION_SCORING = {
+  64: {
+    dimensions: { logic: 0.45, pattern: 0, attention: 0.15, bias: 0.4 },
+    difficulty: 1,
+    trapType: "intuitive_wrong_answer",
+    estimatedTimeSec: 45,
+    scoreReason: {
+      th: {
+        correct: "คุณไม่ติดคำตอบเร็ว 10 เยน และตั้งสมการจากเงื่อนไขจริง",
+        wrong: "ข้อนี้ดักคำตอบเร็วจาก intuition ก่อนตรวจส่วนต่างราคา"
+      },
+      en: {
+        correct: "You avoided the quick 10-yen answer and used the real price gap.",
+        wrong: "This puzzle catches the first intuitive answer before checking the price gap."
+      }
+    }
+  },
+  65: {
+    dimensions: { logic: 0.4, pattern: 0.25, attention: 0.25, bias: 0.1 },
+    difficulty: 1,
+    trapType: "rate_misread",
+    estimatedTimeSec: 50,
+    scoreReason: {
+      th: {
+        correct: "คุณแปลงข้อมูลเป็นอัตราการทำงานต่อวันได้ถูกต้อง",
+        wrong: "ข้อนี้ทดสอบการอ่านอัตราส่วน ไม่ใช่การคูณตัวเลขตามขนาดโจทย์"
+      },
+      en: {
+        correct: "You converted the setup into the correct work rate per day.",
+        wrong: "This tests rate reasoning, not scaling every number upward."
+      }
+    }
+  },
+  66: {
+    dimensions: { logic: 0.3, pattern: 0.45, attention: 0.1, bias: 0.15 },
+    difficulty: 1,
+    trapType: "exponential_growth",
+    estimatedTimeSec: 40,
+    scoreReason: {
+      th: {
+        correct: "คุณเห็นรูปแบบการเพิ่มเป็นสองเท่าและย้อนกลับหนึ่งนาทีได้ถูกต้อง",
+        wrong: "ข้อนี้ดักการคิดแบบเส้นตรง ทั้งที่จำนวนเพิ่มแบบทวีคูณ"
+      },
+      en: {
+        correct: "You saw the doubling pattern and stepped back one minute correctly.",
+        wrong: "This catches linear thinking in a doubling pattern."
+      }
+    }
+  },
+  1: {
+    dimensions: { logic: 0.75, pattern: 0, attention: 0.2, bias: 0.05 },
+    difficulty: 1,
+    trapType: "role_consistency",
+    estimatedTimeSec: 75,
+    scoreReason: {
+      th: {
+        correct: "คุณตรวจความสอดคล้องของแต่ละบทบาทได้เป็นระบบ",
+        wrong: "ข้อนี้ต้องกันสมมติฐานที่ขัดแย้งออกทีละกรณี"
+      },
+      en: {
+        correct: "You checked each role for consistency in a structured way.",
+        wrong: "This puzzle requires eliminating contradictory role assignments one by one."
+      }
+    }
+  },
+  2: {
+    dimensions: { logic: 0.65, pattern: 0.05, attention: 0.25, bias: 0.05 },
+    difficulty: 2,
+    trapType: "constraint_tracking",
+    estimatedTimeSec: 110,
+    scoreReason: {
+      th: {
+        correct: "คุณตาม constraint หลายชั้นโดยไม่สลับคนกับของ",
+        wrong: "ข้อนี้วัดการตามรายละเอียดหลายเงื่อนไขพร้อมกัน"
+      },
+      en: {
+        correct: "You tracked layered constraints without mixing up people and items.",
+        wrong: "This tests careful tracking across several conditions at once."
+      }
+    }
+  },
+  3: {
+    dimensions: { logic: 0.75, pattern: 0, attention: 0.15, bias: 0.1 },
+    difficulty: 2,
+    trapType: "single_statement_deduction",
+    estimatedTimeSec: 90,
+    scoreReason: {
+      th: {
+        correct: "คุณทดสอบกรณี A/B/C และเก็บกรณีที่ไม่ขัดแย้งไว้ได้",
+        wrong: "ข้อนี้ดักการเชื่อคำกล่าวเดียวโดยไม่เช็คผลย้อนกลับ"
+      },
+      en: {
+        correct: "You tested A/B/C and kept the only non-contradictory case.",
+        wrong: "This catches trusting one statement before checking its consequences."
+      }
+    }
+  },
+  4: {
+    dimensions: { logic: 0.55, pattern: 0.3, attention: 0.15, bias: 0 },
+    difficulty: 2,
+    trapType: "outcome_matching",
+    estimatedTimeSec: 120,
+    scoreReason: {
+      th: {
+        correct: "คุณจับคู่ผลลัพธ์จากจำนวนค้อน กรรไกร กระดาษได้ถูกต้อง",
+        wrong: "ข้อนี้ต้องจัดโครงข้อมูลก่อนสรุปว่าใครชนะมากกว่า"
+      },
+      en: {
+        correct: "You matched the rock-paper-scissors counts into valid outcomes.",
+        wrong: "This requires structuring the counts before comparing winners."
+      }
+    }
+  },
+  5: {
+    dimensions: { logic: 0.55, pattern: 0.25, attention: 0.15, bias: 0.05 },
+    difficulty: 3,
+    trapType: "truth_counting",
+    estimatedTimeSec: 130,
+    scoreReason: {
+      th: {
+        correct: "คุณทดสอบจำนวนคำจริงกับแต่ละวันจนเจอเงื่อนไขพอดี",
+        wrong: "ข้อนี้ต้องตรวจทุก candidate ไม่ใช่เลือกวันที่ดูน่าเป็นไปได้"
+      },
+      en: {
+        correct: "You tested truth counts across candidate days until exactly one worked.",
+        wrong: "This needs checking candidates, not picking the day that feels plausible."
+      }
+    }
+  },
+  6: {
+    dimensions: { logic: 0.65, pattern: 0.15, attention: 0.2, bias: 0 },
+    difficulty: 3,
+    trapType: "equation_from_constraints",
+    estimatedTimeSec: 130,
+    scoreReason: {
+      th: {
+        correct: "คุณแปลงอันดับและจำนวนคนเป็นสมการได้ถูกต้อง",
+        wrong: "ข้อนี้ทดสอบการสร้างสมการจาก wording ที่ซ่อนจำนวนทั้งหมด"
+      },
+      en: {
+        correct: "You translated ranking constraints into the right equation.",
+        wrong: "This tests turning wording into the hidden total count."
+      }
+    }
+  },
+  7: {
+    dimensions: { logic: 0.6, pattern: 0.2, attention: 0.2, bias: 0 },
+    difficulty: 3,
+    trapType: "turn_sequence",
+    estimatedTimeSec: 130,
+    scoreReason: {
+      th: {
+        correct: "คุณตามลำดับการเล่นและจำนวนรอบที่แต่ละคนพักได้แม่น",
+        wrong: "ข้อนี้วัดการตาม sequence หลายรอบโดยไม่หลุดเงื่อนไข"
+      },
+      en: {
+        correct: "You tracked the play order and rest counts accurately.",
+        wrong: "This tests following a multi-round sequence without dropping constraints."
+      }
+    }
+  },
+  8: {
+    dimensions: { logic: 0.7, pattern: 0.05, attention: 0.1, bias: 0.15 },
+    difficulty: 4,
+    trapType: "double_negation",
+    estimatedTimeSec: 150,
+    scoreReason: {
+      th: {
+        correct: "คุณใช้คำถามสองชั้นเพื่อล็อกคำตอบของคนพูดจริงและโกหกให้ตรงกัน",
+        wrong: "ข้อนี้ดักการถามตรง ๆ ซึ่งยังแยกคนพูดจริงกับโกหกไม่ได้"
+      },
+      en: {
+        correct: "You used a two-layer question to align truth-teller and liar answers.",
+        wrong: "This catches direct questions that still cannot separate truth from lies."
+      }
+    }
+  },
+  9: {
+    dimensions: { logic: 0.55, pattern: 0.3, attention: 0.05, bias: 0.1 },
+    difficulty: 4,
+    trapType: "coverage_strategy",
+    estimatedTimeSec: 150,
+    scoreReason: {
+      th: {
+        correct: "คุณแบ่งกลยุทธ์ให้คำตอบครอบคลุมทุกกรณีของหมวกสองสี",
+        wrong: "ข้อนี้ไม่ได้ต้องให้ทุกคนถูก แต่ต้องรับประกันว่ามีอย่างน้อยหนึ่งคนถูก"
+      },
+      en: {
+        correct: "You split the strategy so two-color hat cases are fully covered.",
+        wrong: "This does not need everyone correct, only a guarantee that one person is."
+      }
+    }
+  },
+  10: {
+    dimensions: { logic: 0.45, pattern: 0.45, attention: 0.05, bias: 0.05 },
+    difficulty: 5,
+    trapType: "modular_strategy",
+    estimatedTimeSec: 180,
+    scoreReason: {
+      th: {
+        correct: "คุณเห็น pattern แบบ mod 3 และแบ่งบทบาทให้ครอบคลุมทุกผลรวม",
+        wrong: "ข้อนี้ต้องคิดเป็นระบบครอบคลุมทุก remainder ไม่ใช่เดาสีทีละคน"
+      },
+      en: {
+        correct: "You used a mod-3 pattern to cover every possible total.",
+        wrong: "This requires covering every remainder, not guessing colors independently."
+      }
+    }
+  },
+  11: {
+    dimensions: { logic: 0.45, pattern: 0.4, attention: 0.1, bias: 0.05 },
+    difficulty: 5,
+    trapType: "moving_target_search",
+    estimatedTimeSec: 180,
+    scoreReason: {
+      th: {
+        correct: "คุณใช้ pattern กวาดกลับเพื่อบีบเป้าหมายที่เคลื่อนที่ได้",
+        wrong: "ข้อนี้ดักการกวาดทางเดียว ซึ่งเป้าหมายสามารถหลบตามจังหวะได้"
+      },
+      en: {
+        correct: "You used a return sweep pattern to trap a moving target.",
+        wrong: "This catches one-way sweeps that a moving target can evade."
+      }
+    }
+  },
+  12: {
+    dimensions: { logic: 0.75, pattern: 0.05, attention: 0.1, bias: 0.1 },
+    difficulty: 5,
+    trapType: "unreliable_source_filter",
+    estimatedTimeSec: 180,
+    scoreReason: {
+      th: {
+        correct: "คุณแยกปัญหาคนที่เชื่อถือไม่ได้ออกก่อน แล้วค่อยถามทาง",
+        wrong: "ข้อนี้ต้องคัดมนุษย์ออกก่อน ไม่ใช่เริ่มจากถามเรื่องทางทันที"
+      },
+      en: {
+        correct: "You filtered the unreliable person before asking about the path.",
+        wrong: "This requires isolating the human first, not asking about the path immediately."
+      }
+    }
+  }
+};
+
 QUIZ_SECTIONS.forEach((section) => {
   section.questions.forEach((question) => {
     const choiceMeta = QUESTION_CHOICES[question.id];
@@ -5330,6 +5609,9 @@ QUIZ_SECTIONS.forEach((section) => {
       question.choices = choiceMeta.choices;
       question.choicesI18n = choiceMeta.choicesI18n;
       question.correctChoice = choiceMeta.correctChoice;
+    }
+    if (QUESTION_SCORING[question.id]) {
+      question.scoring = QUESTION_SCORING[question.id];
     }
   });
 });
@@ -5370,12 +5652,36 @@ const quizState = {
   currentSection: 0,
   currentQuestion: 0,
   answeredBySection: {},
+  scoreVersion: 0,
   revealed: false,
 };
 
 // DOM references
 let questionEl, progressEl, progressTextEl, revealBtn, nextBtn, prevBtn, sectionHeaderEl, brainHudEl;
 let isHudCollapsed = false;
+
+const BRAIN_DIMENSIONS = ["logic", "pattern", "attention", "bias"];
+const DEFAULT_SCORING = {
+  dimensions: {
+    logic: 1,
+    pattern: 0,
+    attention: 0,
+    bias: 0
+  },
+  difficulty: 1,
+  trapType: "general_reasoning",
+  estimatedTimeSec: 60,
+  scoreReason: {
+    th: {
+      correct: "คุณแก้โจทย์ด้วยตรรกะพื้นฐานได้ถูกต้อง",
+      wrong: "ข้อนี้ใช้เป็นคะแนนตรรกะพื้นฐานจนกว่าจะเพิ่ม metadata เฉพาะข้อ"
+    },
+    en: {
+      correct: "You solved this with baseline logic reasoning.",
+      wrong: "This uses baseline logic scoring until the puzzle receives specific metadata."
+    }
+  }
+};
 
 function getQuestionState() {
   return getCurrentAnswers()[quizState.currentQuestion] || null;
@@ -5394,6 +5700,161 @@ function getCurrentAnswers() {
     quizState.answeredBySection[quizState.currentSection] = [];
   }
   return quizState.answeredBySection[quizState.currentSection];
+}
+
+function getDimensionLabel(dimension) {
+  return openmindTranslate(`quiz.dimensions.${dimension}`);
+}
+
+function getQuestionScoring(question) {
+  const source = question?.scoring || DEFAULT_SCORING;
+  const sourceDimensions = source.dimensions || DEFAULT_SCORING.dimensions;
+  const dimensionTotal = BRAIN_DIMENSIONS.reduce(
+    (sum, dimension) => sum + Number(sourceDimensions[dimension] || 0),
+    0
+  );
+  const normalizedDimensions = BRAIN_DIMENSIONS.reduce((next, dimension) => {
+    const rawValue = Number(sourceDimensions[dimension] || 0);
+    next[dimension] = dimensionTotal ? rawValue / dimensionTotal : DEFAULT_SCORING.dimensions[dimension];
+    return next;
+  }, {});
+
+  return {
+    ...DEFAULT_SCORING,
+    ...source,
+    dimensions: normalizedDimensions,
+    difficulty: Number(source.difficulty || question?.difficulty || DEFAULT_SCORING.difficulty)
+  };
+}
+
+function getQuestionScore(isCorrect, difficulty) {
+  if (!isCorrect) return 0;
+  return 100 * difficulty;
+}
+
+function calculateQuestionContribution(question, isCorrect) {
+  const scoring = getQuestionScoring(question);
+  const baseScore = getQuestionScore(isCorrect, scoring.difficulty);
+  const maxScore = getQuestionScore(true, scoring.difficulty);
+
+  return BRAIN_DIMENSIONS.reduce(
+    (result, dimension) => {
+      result.dimensions[dimension] = baseScore * scoring.dimensions[dimension];
+      result.maxDimensions[dimension] = maxScore * scoring.dimensions[dimension];
+      return result;
+    },
+    {
+      rawPoints: baseScore,
+      maxPoints: maxScore,
+      dimensions: {},
+      maxDimensions: {}
+    }
+  );
+}
+
+function normalizeScore(value, maxValue) {
+  if (!maxValue) return 0;
+  return Math.round((value / maxValue) * 100);
+}
+
+function createEmptyBrainScoreSession() {
+  return {
+    totalAnswered: 0,
+    totalCorrect: 0,
+    rawPoints: 0,
+    maxPoints: 0,
+    dimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 },
+    maxDimensions: { logic: 0, pattern: 0, attention: 0, bias: 0 }
+  };
+}
+
+function calculateBrainScoreSession(sectionIndex = null) {
+  const session = createEmptyBrainScoreSession();
+  const sections = sectionIndex === null
+    ? QUIZ_SECTIONS.map((section, index) => ({ section, index }))
+    : [{ section: QUIZ_SECTIONS[sectionIndex], index: sectionIndex }];
+
+  sections.forEach(({ section, index }) => {
+    if (!section) return;
+    const answers = quizState.answeredBySection[index] || [];
+    answers.forEach((answerState, questionIndex) => {
+      if (!answerState?.checked || answerState.scoreVersion !== quizState.scoreVersion) return;
+      const question = section.questions[questionIndex];
+      if (!question) return;
+      const contribution = calculateQuestionContribution(question, Boolean(answerState.isCorrect));
+
+      session.totalAnswered += 1;
+      session.totalCorrect += answerState.isCorrect ? 1 : 0;
+      session.rawPoints += contribution.rawPoints;
+      session.maxPoints += contribution.maxPoints;
+      BRAIN_DIMENSIONS.forEach((dimension) => {
+        session.dimensions[dimension] += contribution.dimensions[dimension] || 0;
+        session.maxDimensions[dimension] += contribution.maxDimensions[dimension] || 0;
+      });
+    });
+  });
+
+  const normalizedDimensions = BRAIN_DIMENSIONS.reduce((result, dimension) => {
+    result[dimension] = normalizeScore(session.dimensions[dimension], session.maxDimensions[dimension]);
+    return result;
+  }, {});
+  const activeDimensionScores = BRAIN_DIMENSIONS
+    .filter((dimension) => session.maxDimensions[dimension] > 0)
+    .map((dimension) => normalizedDimensions[dimension]);
+  const brainScore = activeDimensionScores.length
+    ? Math.round(activeDimensionScores.reduce((sum, score) => sum + score, 0) / activeDimensionScores.length)
+    : 0;
+
+  return {
+    ...session,
+    normalizedDimensions,
+    brainScore
+  };
+}
+
+function getScoreMessage(brainScore) {
+  if (brainScore >= 80) return openmindTranslate("quiz.scoreStrong");
+  if (brainScore >= 60) return openmindTranslate("quiz.scoreGood");
+  return openmindTranslate("quiz.scoreKeepTraining");
+}
+
+function getDimensionInsight(normalizedDimensions) {
+  const ranked = BRAIN_DIMENSIONS
+    .map((dimension) => ({ dimension, score: normalizedDimensions[dimension] || 0 }))
+    .sort((a, b) => b.score - a.score);
+
+  return {
+    strongest: ranked[0]?.dimension || "logic",
+    weakest: ranked[ranked.length - 1]?.dimension || "attention"
+  };
+}
+
+function buildScoreFeedback(question, isCorrect) {
+  const scoring = getQuestionScoring(question);
+  const contribution = calculateQuestionContribution(question, isCorrect);
+  const mainDimension = BRAIN_DIMENSIONS
+    .map((dimension) => ({
+      dimension,
+      points: Math.round(contribution.dimensions[dimension] || 0),
+      weight: scoring.dimensions[dimension] || 0
+    }))
+    .sort((a, b) => b.points - a.points || b.weight - a.weight)[0];
+  const reason = scoring.scoreReason?.[getOpenmindLanguage()]?.[isCorrect ? "correct" : "wrong"] ||
+    scoring.scoreReason?.en?.[isCorrect ? "correct" : "wrong"] ||
+    openmindTranslate("quiz.scoreFallbackReason");
+
+  return {
+    rawPoints: Math.round(contribution.rawPoints),
+    mainDimension: mainDimension?.dimension || "logic",
+    mainDimensionPoints: mainDimension?.points || 0,
+    dimensions: BRAIN_DIMENSIONS
+      .map((dimension) => ({
+        dimension,
+        points: Math.round(contribution.dimensions[dimension] || 0)
+      }))
+      .filter((item) => item.points > 0),
+    reason
+  };
 }
 
 function pixelizeDiagramMarkup(markup) {
@@ -6014,12 +6475,27 @@ function initQuiz() {
 function renderBrainHud(state = {}) {
   if (!brainHudEl) return;
 
+  const session = calculateBrainScoreSession();
   const status = state.status || "idle";
-  const score = state.score ?? 62;
-  const delta = state.delta ?? "+3";
-  const percentile = state.percentile ?? 38;
-  const message = state.message || "Your Brain Profile is forming...";
+  const score = state.score ?? session.brainScore;
+  const delta = state.delta ?? "+0";
+  const accuracy = session.totalAnswered
+    ? Math.round((session.totalCorrect / session.totalAnswered) * 100)
+    : 0;
+  const message = state.message || (session.totalAnswered
+    ? getScoreMessage(score)
+    : openmindTranslate("quiz.scoreEmpty"));
   const collapsedClass = isHudCollapsed ? " is-collapsed" : "";
+  const dimensionRows = BRAIN_DIMENSIONS.map((dimension) => {
+    const value = session.normalizedDimensions[dimension] || 0;
+    return `
+      <div class="brain-profile-row">
+        <span>${getDimensionLabel(dimension)}</span>
+        <strong>${value}</strong>
+        <em>${session.maxDimensions[dimension] ? "active" : "pending"}</em>
+      </div>
+    `;
+  }).join("");
 
   brainHudEl.className = `brain-score-hud is-${status} is-profile-open${collapsedClass}`;
   brainHudEl.innerHTML = `
@@ -6030,19 +6506,17 @@ function renderBrainHud(state = {}) {
     </div>
     <div class="brain-hud-main">
       <div class="brain-hud-score">
-        <span class="brain-hud-label">Score</span>
+        <span class="brain-hud-label">${openmindTranslate("quiz.brainScore")}</span>
         <strong>${score}</strong>
-        <span class="brain-hud-delta">↑ ${delta}</span>
+        <span class="brain-hud-delta">${delta}</span>
       </div>
-      <p class="brain-hud-percentile">You’re ahead of ${percentile}% of players</p>
-      <button type="button" class="brain-hud-profile-btn">Log in</button>
+      <p class="brain-hud-percentile">${openmindTranslate("quiz.answered")}: ${session.totalAnswered} · ${openmindTranslate("quiz.correct")}: ${session.totalCorrect} · ${accuracy}%</p>
     </div>
     <div class="brain-hud-profile" id="brainHudProfile">
-      <p class="brain-profile-title">Your Brain Profile is forming...</p>
-      <div class="brain-profile-row"><span>Logic</span><strong>███████░░</strong><em>7.2</em></div>
-      <div class="brain-profile-row"><span>Pattern</span><strong>█████░░░░</strong><em>5.1</em></div>
-      <div class="brain-profile-row"><span>Bias</span><strong>████░░░░░</strong><em>4.3</em></div>
-      <p class="brain-profile-insight">You tend to rely on intuition.</p>
+      <p class="brain-profile-title">${openmindTranslate("quiz.brainScore")}: ${score}</p>
+      ${dimensionRows}
+      <p class="brain-profile-insight">${message}</p>
+      <button type="button" class="brain-hud-profile-btn" data-score-reset>${openmindTranslate("quiz.resetScore")}</button>
     </div>
   `;
 
@@ -6051,28 +6525,39 @@ function renderBrainHud(state = {}) {
     brainHudEl.classList.toggle("is-collapsed", isHudCollapsed);
     brainHudEl.querySelector("[data-hud-collapse]").textContent = isHudCollapsed ? "▲" : "▼";
   });
+  brainHudEl.querySelector("[data-score-reset]")?.addEventListener("click", resetBrainScore);
 }
 
-function updateBrainHudAfterAnswer(isCorrect) {
+function resetBrainScore() {
+  quizState.scoreVersion += 1;
+  renderBrainHud({
+    status: "idle",
+    score: 0,
+    delta: "+0",
+    message: openmindTranslate("quiz.scoreEmpty")
+  });
+}
+
+function updateBrainHudAfterAnswer(isCorrect, scoreFeedback) {
+  const session = calculateBrainScoreSession();
+  const delta = isCorrect && scoreFeedback?.mainDimensionPoints
+    ? `+${scoreFeedback.mainDimensionPoints} ${getDimensionLabel(scoreFeedback.mainDimension)}`
+    : "+0";
   renderBrainHud({
     status: isCorrect ? "correct" : "wrong",
-    score: isCorrect ? 65 : 62,
-    delta: isCorrect ? "+3" : "+0",
-    percentile: isCorrect ? 41 : 38,
-    message: isCorrect ? "+3 Logic improved" : "Trap detected: check your assumption"
+    score: session.brainScore,
+    delta,
+    message: scoreFeedback?.reason || (isCorrect ? getScoreMessage(session.brainScore) : openmindTranslate("quiz.scoreNoPoints"))
   });
 }
 
 function updateBrainHudForCompletion() {
-  const currentSection = QUIZ_SECTIONS[quizState.currentSection];
-  if (currentSection?.id !== "ทดลอง") return;
-
+  const session = calculateBrainScoreSession();
   renderBrainHud({
     status: "complete",
-    score: 65,
-    delta: "+3",
-    percentile: 41,
-    message: "Warm-Up complete. Your Brain Profile is forming..."
+    score: session.brainScore,
+    delta: "+0",
+    message: getScoreMessage(session.brainScore)
   });
 }
 
@@ -6284,15 +6769,18 @@ function revealAnswer() {
   if (selectedState?.checked) return;
   if (hasChoices && selectedState.selectedChoice === undefined) return;
   const isCorrect = hasChoices ? selectedState.selectedChoice === q.correctChoice : true;
+  const scoreFeedback = buildScoreFeedback(q, isCorrect);
 
   setQuestionState({
     checked: true,
     isCorrect,
-    completedOnce: true
+    completedOnce: true,
+    scoreVersion: quizState.scoreVersion,
+    scoreFeedback
   });
   quizState.revealed = true;
 
-  updateBrainHudAfterAnswer(isCorrect);
+  updateBrainHudAfterAnswer(isCorrect, scoreFeedback);
   renderQuestion();
   document.getElementById("quizAnswer").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -6314,11 +6802,21 @@ function renderFeedback(q, savedState) {
   const copy = savedState.isCorrect
     ? openmindTranslate("quiz.feedbackCorrectCopy")
     : openmindTranslate("quiz.feedbackWrongCopy");
+  const scoreFeedback = savedState.scoreFeedback || buildScoreFeedback(q, savedState.isCorrect);
+  const scoreItems = savedState.isCorrect && scoreFeedback.dimensions.length
+    ? scoreFeedback.dimensions
+      .map((item) => `<span class="quiz-score-pill">+${item.points} ${getDimensionLabel(item.dimension)}</span>`)
+      .join("")
+    : `<span class="quiz-score-pill is-empty">${openmindTranslate("quiz.scoreNoPoints")}</span>`;
 
   feedbackEl.innerHTML = `
     <div class="quiz-feedback-card ${statusClass}">
       <div class="quiz-feedback-title">${title}</div>
       <p class="quiz-feedback-copy">${copy}</p>
+      <div class="quiz-score-feedback">
+        <div class="quiz-score-pills">${scoreItems}</div>
+        <p>${scoreFeedback.reason}</p>
+      </div>
       <div class="quiz-feedback-rows">
         <div class="quiz-feedback-row">
           <span class="quiz-feedback-label">${openmindTranslate("quiz.yourAnswer")}</span>
@@ -6374,10 +6872,39 @@ function prevQuestion() {
   }
 }
 
+function buildCompletionScoreSummary(sectionIndex) {
+  const sectionSession = calculateBrainScoreSession(sectionIndex);
+  const insight = getDimensionInsight(sectionSession.normalizedDimensions);
+  const dimensionRows = BRAIN_DIMENSIONS.map((dimension) => `
+    <div class="quiz-result-dimension">
+      <span>${getDimensionLabel(dimension)}</span>
+      <strong>${sectionSession.normalizedDimensions[dimension] || 0}</strong>
+    </div>
+  `).join("");
+
+  return `
+    <div class="quiz-result-summary">
+      <div class="quiz-result-score">
+        <span>${openmindTranslate("quiz.brainScore")}</span>
+        <strong>${sectionSession.brainScore}</strong>
+      </div>
+      <div class="quiz-result-stats">
+        <span>${openmindTranslate("quiz.answered")}: ${sectionSession.totalAnswered}</span>
+        <span>${openmindTranslate("quiz.correct")}: ${sectionSession.totalCorrect}</span>
+      </div>
+      <div class="quiz-result-dimensions">${dimensionRows}</div>
+      <p class="quiz-result-insight">${getScoreMessage(sectionSession.brainScore)}</p>
+      <p class="quiz-result-insight">${openmindTranslate("quiz.scoreStrongest", { dimension: getDimensionLabel(insight.strongest) })}</p>
+      <p class="quiz-result-insight">${openmindTranslate("quiz.scoreWeakest", { dimension: getDimensionLabel(insight.weakest) })}</p>
+    </div>
+  `;
+}
+
 function showCompletion() {
   updateBrainHudForCompletion();
   const section = getLocalizedSection(QUIZ_SECTIONS[quizState.currentSection]);
   const hasNextSection = quizState.currentSection < QUIZ_SECTIONS.length - 1;
+  const scoreSummary = buildCompletionScoreSummary(quizState.currentSection);
   const completeNav = section.questions
     .map(
       (_, index) => `
@@ -6401,6 +6928,7 @@ function showCompletion() {
         <h2 class="quiz-complete-title">${hasNextSection ? openmindTranslate("quiz.completionTitle", { section: section.title }) : openmindTranslate("quiz.completionAllTitle")}</h2>
         <p class="quiz-complete-text">${hasNextSection ? openmindTranslate("quiz.completionCopy", { section: section.title, count: section.questions.length }) : openmindTranslate("quiz.completionAllCopy", { count: QUIZ_SECTIONS.reduce((sum, current) => sum + current.questions.length, 0) })}<br>
         ${hasNextSection ? openmindTranslate("quiz.completionNext") : openmindTranslate("quiz.completionDone")}</p>
+        ${scoreSummary}
         <div class="quiz-complete-nav">
           <p class="quiz-complete-nav-label">${openmindTranslate("quiz.completionReplayLabel")}</p>
           <div class="quiz-jump-nav">${completeNav}</div>

@@ -982,6 +982,46 @@ input {
   line-height: 1.6;
 }
 
+.quiz-score-feedback {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(11, 16, 32, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.quiz-score-feedback p {
+  margin: 0;
+  color: #4d5868;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.quiz-score-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quiz-score-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid rgba(17, 163, 106, 0.24);
+  background: rgba(236, 253, 245, 0.95);
+  color: var(--brain-correct);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.quiz-score-pill.is-empty {
+  border-color: rgba(207, 55, 95, 0.18);
+  background: rgba(255, 244, 246, 0.95);
+  color: var(--brain-wrong);
+}
+
 .quiz-feedback-rows {
   display: grid;
   gap: 10px;
@@ -1052,6 +1092,74 @@ input {
   color: var(--brain-muted);
   font-size: 13px;
   font-weight: 700;
+}
+
+.quiz-result-summary {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 620px);
+  margin: 8px auto 2px;
+  padding: 16px;
+  border: 2px solid #0b1020;
+  background: #ffffff;
+  box-shadow: 4px 4px 0 #0b1020;
+}
+
+.quiz-result-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.quiz-result-score span,
+.quiz-result-stats,
+.quiz-result-dimension span {
+  color: var(--brain-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.quiz-result-score strong {
+  color: var(--brain-accent-strong);
+  font-size: 36px;
+  line-height: 1;
+}
+
+.quiz-result-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quiz-result-dimensions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quiz-result-dimension {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--brain-line);
+  background: rgba(247, 250, 252, 0.88);
+}
+
+.quiz-result-dimension strong {
+  color: var(--brain-ink);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.quiz-result-insight {
+  margin: 0;
+  color: #4d5868;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .explain-step {
@@ -3729,6 +3837,14 @@ body {
   box-shadow: 2px 2px 0 #0f3674;
 }
 
+.openmind-go-copy {
+  margin: -10px 0 0;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .brain-score-hud {
   position: fixed;
   left: 50%;
@@ -3880,7 +3996,7 @@ body {
 
 .brain-profile-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 34px;
+  grid-template-columns: 72px 44px minmax(54px, auto);
   gap: 8px;
   align-items: center;
   color: rgba(255, 255, 255, 0.9);
@@ -3947,6 +4063,10 @@ body {
 .quiz-jump-btn {
   min-width: 34px;
   height: 34px;
+}
+
+.quiz-result-dimensions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .quiz-q-meta {
