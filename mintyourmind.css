@@ -3437,7 +3437,7 @@ body {
 }
 
 .openmind-page:not(.openmind-is-landing) .openmind-shell {
-  padding-bottom: 260px;
+  padding-bottom: 140px;
 }
 
 .openmind-is-landing .openmind-home-btn {
@@ -4149,7 +4149,7 @@ body {
   }
 
   .openmind-page:not(.openmind-is-landing) .openmind-shell {
-    padding-bottom: 240px;
+    padding-bottom: 130px;
   }
 
   .brain-score-hud {

@@ -6505,6 +6505,17 @@ function initQuiz() {
   nextBtn.addEventListener("click", nextQuestion);
   prevBtn.addEventListener("click", prevQuestion);
 
+  let lastScrollY = window.scrollY;
+  window.addEventListener("scroll", () => {
+    if (!isHudCollapsed && Math.abs(window.scrollY - lastScrollY) > 8) {
+      isHudCollapsed = true;
+      brainHudEl.classList.add("is-collapsed");
+      const btn = brainHudEl.querySelector("[data-hud-collapse]");
+      if (btn) btn.textContent = "▲";
+    }
+    lastScrollY = window.scrollY;
+  }, { passive: true });
+
   renderBrainHud();
   renderQuestion();
 }
